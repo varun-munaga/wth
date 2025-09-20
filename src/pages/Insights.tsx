@@ -176,7 +176,7 @@ const Insights: React.FC<InsightsProps> = ({ darkMode }) => {
   if (data.sleepEntries.length === 0) {
     return (
       <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-20`}>
-        <div className="container mx-auto px-4 py-6 max-w-md">
+        <div className="container mx-auto px-4 py-6 max-w-2xl lg:max-w-4xl">
           <h1 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
             Insights & Trends
           </h1>
@@ -199,14 +199,14 @@ const Insights: React.FC<InsightsProps> = ({ darkMode }) => {
   
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-20`}>
-      <div className="container mx-auto px-4 py-6 max-w-md">
+      <div className="container mx-auto px-4 py-6 max-w-2xl lg:max-w-4xl">
         {/* Header */}
         <h1 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
           Insights & Trends
         </h1>
         
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+  {/* Statistics Cards */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className={`p-6 rounded-2xl text-center ${
             darkMode ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-700/50' : 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200'
           } border`}>
@@ -240,12 +240,12 @@ const Insights: React.FC<InsightsProps> = ({ darkMode }) => {
         {anxietyImprovement !== null && anxietyImprovement > 0 && (
           <div className={`p-6 rounded-2xl mb-8 text-center ${
             darkMode ? 'bg-gradient-to-r from-green-900/30 to-emerald-900/30 border-green-700/50' : 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'
-          } border`}>
-            <Award className={`mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} size={32} />
-            <h3 className={`font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+          } border md:max-w-lg mx-auto`}>
+            <Award className={`mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} size={40} />
+            <h3 className={`text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Amazing Progress! 🎉
             </h3>
-            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Your anxiety decreased by {anxietyImprovement} points this week!
             </p>
           </div>
@@ -254,11 +254,11 @@ const Insights: React.FC<InsightsProps> = ({ darkMode }) => {
         {/* Trends Chart */}
         <div className={`p-6 rounded-2xl mb-8 ${
           darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } border shadow-sm`}>
-          <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+        } border shadow-sm md:max-w-2xl mx-auto`}>
+          <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
             14-Day Trends
           </h3>
-          <div style={{ height: '200px' }}>
+          <div style={{ height: '280px' }}>
             <Line data={lineChartData} options={chartOptions} />
           </div>
         </div>
@@ -267,11 +267,11 @@ const Insights: React.FC<InsightsProps> = ({ darkMode }) => {
         {Object.keys(triggerCounts).length > 0 && (
           <div className={`p-6 rounded-2xl mb-8 ${
             darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
-            <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+          } border shadow-sm md:max-w-lg mx-auto`}>
+            <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Anxiety Triggers
             </h3>
-            <div style={{ height: '200px' }}>
+            <div style={{ height: '220px' }}>
               <Doughnut data={doughnutData} options={doughnutOptions} />
             </div>
           </div>
@@ -280,35 +280,32 @@ const Insights: React.FC<InsightsProps> = ({ darkMode }) => {
         {/* Insights */}
         <div className={`p-6 rounded-2xl mb-8 ${
           darkMode ? 'bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border-indigo-700/50' : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200'
-        } border`}>
-          <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+        } border md:max-w-2xl mx-auto`}>
+          <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
             Personal Insights
           </h3>
-          
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {data.settings.demoMode ? (
               <>
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                     📱 <strong>Social Media Impact:</strong> You sleep 2.3 points better on nights when you avoid social media after 9 PM.
                   </p>
                 </div>
-                
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                     🧠 <strong>Overthinking Pattern:</strong> Your anxiety peaks on Sunday nights. Consider creating a calming Sunday evening routine.
                   </p>
                 </div>
-                
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                     📚 <strong>Academic Stress:</strong> You're making great progress managing exam anxiety. Your sleep quality improved 40% this week!
                   </p>
                 </div>
               </>
             ) : (
               <div className={`p-4 rounded-xl text-center ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-base ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   Keep tracking for more personalized insights! I'll identify patterns unique to your sleep journey.
                 </p>
               </div>

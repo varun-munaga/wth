@@ -132,10 +132,10 @@ const Chat: React.FC<ChatProps> = ({ darkMode }) => {
   };
   
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col`}>
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-blue-100'} flex flex-col`}>
       {/* Header */}
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b p-4`}>
-        <div className="container mx-auto max-w-md">
+      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b p-6`}>
+        <div className="container mx-auto max-w-2xl lg:max-w-4xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className={`w-10 h-10 rounded-full ${darkMode ? 'bg-purple-600' : 'bg-purple-500'} flex items-center justify-center`}>
@@ -166,8 +166,8 @@ const Chat: React.FC<ChatProps> = ({ darkMode }) => {
       </div>
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="container mx-auto max-w-md space-y-4">
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="container mx-auto max-w-2xl lg:max-w-4xl space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -215,8 +215,8 @@ const Chat: React.FC<ChatProps> = ({ darkMode }) => {
       </div>
       
       {/* Input */}
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t p-4`}>
-        <div className="container mx-auto max-w-md">
+      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t p-6`}>
+        <div className="container mx-auto max-w-2xl lg:max-w-4xl">
           <form onSubmit={handleSubmit} className="flex items-end space-x-2">
             <div className="flex-1">
               <textarea

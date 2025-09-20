@@ -52,10 +52,10 @@ const Diary: React.FC<DiaryProps> = ({ darkMode }) => {
   const morningEntry = dateEntries.find(e => e.type === 'morning');
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-8`}>
-      <div className="container mx-auto px-4 py-6 max-w-md">
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-blue-100'} pb-8`}>
+      <div className="container mx-auto px-4 py-8 max-w-2xl lg:max-w-4xl">
         {/* Header */}
-        <div className="flex items-center space-x-3 mb-8">
+  <div className="flex items-center space-x-3 mb-10">
           <button
             onClick={() => navigate('/dashboard')}
             className={`p-2 rounded-lg ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
@@ -73,9 +73,9 @@ const Diary: React.FC<DiaryProps> = ({ darkMode }) => {
         </div>
 
         {/* Date Selector */}
-        <div className={`p-4 rounded-2xl mb-6 ${
-          darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } border shadow-sm`}>
+        <div className={`p-6 rounded-3xl mb-8 ${
+          darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-blue-100'
+        } border shadow-lg`}>
           <div className="flex items-center justify-between">
             <button
               onClick={() => setSelectedDate(new Date(selectedDate.getTime() - 24 * 60 * 60 * 1000))}
@@ -103,9 +103,9 @@ const Diary: React.FC<DiaryProps> = ({ darkMode }) => {
         </div>
 
         {/* Evening Entry */}
-        <div className={`p-6 rounded-2xl mb-6 ${
-          darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } border shadow-sm`}>
+        <div className={`p-7 rounded-3xl mb-10 ${
+          darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+        } border shadow-lg`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <Moon className="text-purple-400" size={20} />
@@ -202,9 +202,9 @@ const Diary: React.FC<DiaryProps> = ({ darkMode }) => {
         </div>
 
         {/* Morning Entry */}
-        <div className={`p-6 rounded-2xl mb-6 ${
-          darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } border shadow-sm`}>
+        <div className={`p-7 rounded-3xl mb-10 ${
+          darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+        } border shadow-lg`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <Sun className="text-orange-400" size={20} />
@@ -304,9 +304,9 @@ const Diary: React.FC<DiaryProps> = ({ darkMode }) => {
         </div>
 
         {/* Quick Actions */}
-        <div className={`p-6 rounded-2xl ${
-          darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } border shadow-sm`}>
+        <div className={`p-7 rounded-3xl ${
+          darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+        } border shadow-lg`}>
           <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
             Quick Actions
           </h3>

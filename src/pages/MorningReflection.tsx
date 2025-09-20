@@ -66,10 +66,10 @@ const MorningReflection: React.FC<MorningReflectionProps> = ({ darkMode }) => {
   };
   
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-8`}>
-      <div className="container mx-auto px-4 py-6 max-w-md">
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-blue-100'} pb-8`}>
+      <div className="container mx-auto px-4 py-8 max-w-2xl lg:max-w-4xl">
         {/* Header */}
-        <div className="flex items-center space-x-3 mb-8">
+  <div className="flex items-center space-x-3 mb-10">
           <button
             onClick={() => navigate('/dashboard')}
             className={`p-2 rounded-lg ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
@@ -86,11 +86,11 @@ const MorningReflection: React.FC<MorningReflectionProps> = ({ darkMode }) => {
           </div>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+  <form onSubmit={handleSubmit} className="space-y-10">
           {/* Sleep Quality */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <label className={`block text-lg font-medium mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
               How did you sleep? (Comfort, not performance)
             </label>
@@ -123,9 +123,9 @@ const MorningReflection: React.FC<MorningReflectionProps> = ({ darkMode }) => {
           </div>
           
           {/* Wake Time */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <label className={`block text-lg font-medium mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
               What time did you wake up?
             </label>
@@ -142,9 +142,9 @@ const MorningReflection: React.FC<MorningReflectionProps> = ({ darkMode }) => {
           </div>
           
           {/* Night Anxiety */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <label className={`block text-lg font-medium mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
               Did you experience anxiety during the night?
             </label>
@@ -199,9 +199,9 @@ const MorningReflection: React.FC<MorningReflectionProps> = ({ darkMode }) => {
           </div>
           
           {/* Energy Level */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <label className={`block text-lg font-medium mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
               How's your energy level right now?
             </label>
@@ -257,13 +257,13 @@ const MorningReflection: React.FC<MorningReflectionProps> = ({ darkMode }) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center space-x-2 ${
+            className={`w-full py-5 px-8 rounded-2xl font-semibold text-white transition-all duration-200 flex items-center justify-center space-x-2 text-lg shadow-lg ${
               isSubmitting
                 ? 'bg-gray-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600'
             }`}
           >
-            <Save size={20} />
+            <Save size={24} />
             <span>{isSubmitting ? 'Saving...' : 'Start the day positively'}</span>
           </button>
         </form>

@@ -63,10 +63,10 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-8`}>
-      <div className="container mx-auto px-4 py-6 max-w-md">
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-blue-100'} pb-8`}>
+      <div className="container mx-auto px-4 py-8 max-w-2xl lg:max-w-4xl">
         {/* Header */}
-        <div className="flex items-center space-x-3 mb-8">
+  <div className="flex items-center space-x-3 mb-10">
           <button
             onClick={() => navigate('/dashboard')}
             className={`p-2 rounded-lg ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
@@ -83,11 +83,11 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
           </div>
         </div>
 
-        <div className="space-y-6">
+  <div className="space-y-8">
           {/* Appearance */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Appearance
             </h2>
@@ -151,9 +151,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
           </div>
 
           {/* Notifications */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Notifications
             </h2>
@@ -186,9 +186,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
           </div>
 
           {/* Demo Mode */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Demo Mode
             </h2>
@@ -221,9 +221,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
           </div>
 
           {/* Data Management */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Data Management
             </h2>
@@ -260,9 +260,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
           </div>
 
           {/* Privacy */}
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl ${
+            darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'
+          } border shadow-lg`}>
             <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Privacy & Security
             </h2>

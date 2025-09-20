@@ -134,203 +134,150 @@ const Dashboard: React.FC<DashboardProps> = ({ darkMode }) => {
     ]
   };
   
+  // Responsive max width for desktop
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className="container mx-auto px-4 py-6 max-w-md">
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-blue-100'}`}>
+      <div className="container mx-auto px-4 py-8 max-w-2xl lg:max-w-4xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className={`flex items-center justify-between p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <GreetingIcon className={darkMode ? 'text-orange-400' : 'text-orange-500'} size={24} />
-                <h1 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  {greeting}, {data.user?.name || 'there'}!
-                </h1>
+        <div className="mb-10">
+          <div className={`relative overflow-hidden rounded-3xl shadow-lg border ${darkMode ? 'bg-gradient-to-r from-purple-900 via-gray-900 to-blue-900 border-gray-800' : 'bg-gradient-to-r from-purple-100 via-blue-50 to-blue-200 border-blue-100'}`}> 
+            <div className="flex items-center justify-between p-8">
+              <div>
+                <div className="flex items-center space-x-3 mb-2">
+                  <GreetingIcon className={darkMode ? 'text-orange-400' : 'text-orange-500'} size={32} />
+                  <h1 className={`text-2xl font-extrabold tracking-tight ${darkMode ? 'text-white' : 'text-gray-900'}`}> 
+                    {greeting}, {data.user?.name || 'there'}!
+                  </h1>
+                </div>
+                <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}> 
+                  {currentAnxietyLevel 
+                    ? `Current anxiety level: ${currentAnxietyLevel}/10`
+                    : 'How are you feeling today?'
+                  }
+                </p>
               </div>
-              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                {currentAnxietyLevel 
-                  ? `Current anxiety level: ${currentAnxietyLevel}/10`
-                  : 'How are you feeling today?'
-                }
-              </p>
+              {currentAnxietyLevel && (
+                <div className={`text-4xl font-bold ${
+                  currentAnxietyLevel <= 3 ? 'text-green-400' :
+                  currentAnxietyLevel <= 6 ? 'text-yellow-400' : 'text-red-400'
+                }`}>
+                  {currentAnxietyLevel <= 3 ? '😌' : currentAnxietyLevel <= 6 ? '😐' : '😰'}
+                </div>
+              )}
             </div>
-            {currentAnxietyLevel && (
-              <div className={`text-3xl font-bold ${
-                currentAnxietyLevel <= 3 ? 'text-green-500' :
-                currentAnxietyLevel <= 6 ? 'text-yellow-500' : 'text-red-500'
-              }`}>
-                {currentAnxietyLevel <= 3 ? '😌' : currentAnxietyLevel <= 6 ? '😐' : '😰'}
-              </div>
-            )}
+            <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
+              <Calendar size={120} />
+            </div>
           </div>
         </div>
-        
+
         {/* Today's Summary */}
-        <div className="mb-8">
-          <h2 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            Today's Summary
-          </h2>
-          
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
-            <div className="grid grid-cols-2 gap-4">
+        <div className="mb-10">
+          <h2 className={`text-xl font-bold mb-5 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Today's Summary</h2>
+          <div className={`p-7 rounded-3xl border shadow-lg flex flex-col gap-6 ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'}`}> 
+            <div className="grid grid-cols-2 gap-6">
               <div className="text-center">
-                <div className={`text-2xl font-bold mb-1 ${
-                  currentAnxietyLevel 
-                    ? currentAnxietyLevel <= 3 ? 'text-green-500' : currentAnxietyLevel <= 6 ? 'text-yellow-500' : 'text-red-500'
-                    : darkMode ? 'text-gray-400' : 'text-gray-500'
+                <div className={`text-3xl font-extrabold mb-1 ${
+                  currentAnxietyLevel !== null 
+                    ? currentAnxietyLevel <= 3 ? 'text-green-400' : currentAnxietyLevel <= 6 ? 'text-yellow-400' : 'text-red-400'
+                    : darkMode ? 'text-gray-500' : 'text-gray-400'
                 }`}>
-                  {currentAnxietyLevel || '--'}
+                  {currentAnxietyLevel !== null ? currentAnxietyLevel : '--'}
                 </div>
-                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Anxiety Level
-                </div>
+                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Anxiety Level</div>
               </div>
-              
               <div className="text-center">
-                <div className={`text-2xl font-bold mb-1 ${
-                  avgSleepQuality 
-                    ? avgSleepQuality >= 7 ? 'text-green-500' : avgSleepQuality >= 4 ? 'text-yellow-500' : 'text-red-500'
-                    : darkMode ? 'text-gray-400' : 'text-gray-500'
+                <div className={`text-3xl font-extrabold mb-1 ${
+                  avgSleepQuality !== null 
+                    ? avgSleepQuality >= 7 ? 'text-green-400' : avgSleepQuality >= 4 ? 'text-yellow-400' : 'text-red-400'
+                    : darkMode ? 'text-gray-500' : 'text-gray-400'
                 }`}>
-                  {avgSleepQuality || '--'}
+                  {avgSleepQuality !== null ? avgSleepQuality : '--'}
                 </div>
-                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Sleep Quality
-                </div>
+                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Sleep Quality</div>
               </div>
             </div>
-            
-            <div className={`text-center mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-              <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                🎯 Bedtime Goal: 10:30 PM
-              </div>
-              <div className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                AI Coach: Ready to help
-              </div>
+            <div className={`text-center pt-4 border-t ${darkMode ? 'border-gray-800' : 'border-blue-100'}`}> 
+              <div className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>🎯 Bedtime Goal: <span className="font-semibold">10:30 PM</span></div>
+              <div className={`text-xs mt-1 ${darkMode ? 'text-purple-300' : 'text-purple-700'}`}>AI Coach: Ready to help</div>
             </div>
           </div>
         </div>
-        
+
         {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            Quick Actions
-          </h2>
-          
-          <div className="grid grid-cols-1 gap-3">
+        <div className="mb-10">
+          <h2 className={`text-xl font-bold mb-5 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               to="/diary/evening"
-              className={`flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center space-y-2 p-5 rounded-2xl transition-all duration-200 shadow-md border text-center ${
                 darkMode 
-                  ? 'bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700/50' 
-                  : 'bg-purple-50 hover:bg-purple-100 border border-purple-200'
+                  ? 'bg-purple-900/40 hover:bg-purple-900/60 border-purple-700/50' 
+                  : 'bg-purple-50 hover:bg-purple-100 border-purple-200'
               }`}
             >
-              <Moon className={`${darkMode ? 'text-purple-400' : 'text-purple-600'}`} size={20} />
-              <div className="flex-1">
-                <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Evening Check-in
-                </h3>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  How anxious are you about tonight?
-                </p>
-              </div>
+              <Moon className={`${darkMode ? 'text-purple-400' : 'text-purple-600'}`} size={32} />
+              <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Evening Check-in</h3>
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>How anxious are you about tonight?</p>
             </Link>
-            
             <Link
               to="/diary/morning"
-              className={`flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center space-y-2 p-5 rounded-2xl transition-all duration-200 shadow-md border text-center ${
                 darkMode 
-                  ? 'bg-orange-900/30 hover:bg-orange-900/50 border border-orange-700/50' 
-                  : 'bg-orange-50 hover:bg-orange-100 border border-orange-200'
+                  ? 'bg-orange-900/40 hover:bg-orange-900/60 border-orange-700/50' 
+                  : 'bg-orange-50 hover:bg-orange-100 border-orange-200'
               }`}
             >
-              <Sun className={`${darkMode ? 'text-orange-400' : 'text-orange-600'}`} size={20} />
-              <div className="flex-1">
-                <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Morning Reflection
-                </h3>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  How did you sleep?
-                </p>
-              </div>
+              <Sun className={`${darkMode ? 'text-orange-400' : 'text-orange-600'}`} size={32} />
+              <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Morning Reflection</h3>
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>How did you sleep?</p>
             </Link>
-            
             <Link
               to="/chat"
-              className={`flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center space-y-2 p-5 rounded-2xl transition-all duration-200 shadow-md border text-center ${
                 darkMode 
-                  ? 'bg-blue-900/30 hover:bg-blue-900/50 border border-blue-700/50' 
-                  : 'bg-blue-50 hover:bg-blue-100 border border-blue-200'
+                  ? 'bg-blue-900/40 hover:bg-blue-900/60 border-blue-700/50' 
+                  : 'bg-blue-50 hover:bg-blue-100 border-blue-200'
               }`}
             >
-              <MessageCircle className={`${darkMode ? 'text-blue-400' : 'text-blue-600'}`} size={20} />
-              <div className="flex-1">
-                <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Chat with AI Coach
-                </h3>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Get personalized support
-                </p>
-              </div>
+              <MessageCircle className={`${darkMode ? 'text-blue-400' : 'text-blue-600'}`} size={32} />
+              <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Chat with AI Coach</h3>
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Get personalized support</p>
             </Link>
           </div>
         </div>
-        
+
         {/* Weekly Progress */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Weekly Progress
-            </h2>
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Weekly Progress</h2>
             <Link 
               to="/insights"
-              className={`text-sm ${darkMode ? 'text-purple-400' : 'text-purple-600'} hover:underline`}
-            >
-              View all insights
-            </Link>
+              className={`text-sm font-semibold ${darkMode ? 'text-purple-300' : 'text-purple-700'} hover:underline`}
+            >View all insights</Link>
           </div>
-          
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm`}>
+          <div className={`p-7 rounded-3xl border shadow-lg ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-blue-100'}`}> 
             {data.sleepEntries.length > 0 ? (
-              <div style={{ height: '200px' }}>
+              <div style={{ height: '220px' }}>
                 <Line data={lineChartData} options={chartOptions} />
               </div>
             ) : (
-              <div className="flex items-center justify-center py-8">
-                <TrendingUp className={`${darkMode ? 'text-gray-600' : 'text-gray-400'} mr-3`} size={24} />
-                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Charts will appear after more entries
-                </p>
+              <div className="flex flex-col items-center justify-center py-10">
+                <TrendingUp className={`${darkMode ? 'text-gray-600' : 'text-gray-400'} mb-2`} size={32} />
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-base`}>Charts will appear after more entries</p>
               </div>
             )}
           </div>
         </div>
-        
+
         {/* Insights */}
-        <div className="mb-8">
-          <h2 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            Today's Insight
-          </h2>
-          
-          <div className={`p-6 rounded-2xl ${
-            darkMode ? 'bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-700/50' : 'bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200'
-          } border`}>
+        <div className="mb-10">
+          <h2 className={`text-xl font-bold mb-5 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Today's Insight</h2>
+          <div className={`p-7 rounded-3xl border shadow-lg ${darkMode ? 'bg-gradient-to-r from-purple-900/60 to-blue-900/60 border-purple-700/50' : 'bg-gradient-to-r from-purple-100 to-blue-100 border-purple-200'}`}> 
             <div className="text-center">
-              <div className="text-2xl mb-3">💡</div>
-              <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>
-                Sleep Tip of the Day
-              </p>
-              <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                Try the 4-7-8 breathing technique tonight: breathe in for 4, hold for 7, out for 8. 
-                This naturally activates your body's relaxation response.
-              </p>
+              <div className="text-3xl mb-3">💡</div>
+              <p className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>Sleep Tip of the Day</p>
+              <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Try the 4-7-8 breathing technique tonight: breathe in for 4, hold for 7, out for 8. This naturally activates your body's relaxation response.</p>
             </div>
           </div>
         </div>
