@@ -5,29 +5,7 @@ A complete sleep anxiety management application with AI-powered video counseling
 ## 🏗️ Project Structure
 
 ```
-sleepsense-ai/
-├── client/                       # Frontend (React Client)
-│   ├── src/                     # React source code
-│   ├── public/                  # Static assets
-│   ├── package.json             # Frontend dependencies
-│   ├── vite.config.ts           # Vite configuration
-│   ├── tailwind.config.js       # Tailwind CSS config
-│   ├── tsconfig.json            # TypeScript config
-│   └── env.example              # Environment variables template
-├── server/                      # Backend (Express.js Server)
-│   ├── routes/                  # API routes
-│   ├── services/                # Business logic
-│   ├── package.json             # Backend dependencies
-│   ├── server.js                # Main server file
-│   └── env.example              # Environment variables template
-├── start-dev.bat                # Windows startup script
-├── start-dev.sh                 # Linux/Mac startup script
-├── setup-env.bat                # Windows environment setup
-├── setup-env.sh                 # Linux/Mac environment setup
-└── README.md                    # This file
-```
-
-## 🚀 Quick Start
+\## 🚀 Quick Start
 
 ### 1. Setup Environment Files
 
