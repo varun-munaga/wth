@@ -45,6 +45,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
   const handleExportData = () => {
     const data = loadData();
     const dataStr = JSON.stringify(data, null, 2);
+    // Download JSON
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
@@ -54,6 +55,32 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  // PDF Export
+  const handleExportPDF = async () => {
+    const data = loadData();
+    // Dynamically import jsPDF
+    const jsPDF = (await import('jspdf')).jsPDF;
+    const doc = new jsPDF();
+    doc.setFont('helvetica');
+    doc.setFontSize(16);
+    doc.text('SleepSense Data Export', 20, 20);
+    doc.setFontSize(10);
+    let y = 30;
+    Object.entries(data).forEach(([key, value]) => {
+      doc.text(`${key}:`, 20, y);
+      y += 6;
+      let valStr = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+      valStr.split('\n').forEach(line => {
+        doc.text(line, 25, y);
+        y += 5;
+        if (y > 270) { doc.addPage(); y = 20; }
+      });
+      y += 4;
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+    doc.save(`sleepsense-data-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const handleClearData = () => {
@@ -229,19 +256,34 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, onToggleDarkMode }) => {
             </h2>
             
             <div className="space-y-3">
-              <button
-                onClick={handleExportData}
-                className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${
-                  darkMode 
-                    ? 'bg-blue-900/30 hover:bg-blue-900/50 border border-blue-700/50' 
-                    : 'bg-blue-50 hover:bg-blue-100 border border-blue-200'
-                }`}
-              >
-                <Download className={darkMode ? 'text-blue-400' : 'text-blue-600'} size={20} />
-                <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Export My Data
-                </span>
-              </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button
+                  onClick={handleExportData}
+                  className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${
+                    darkMode 
+                      ? 'bg-gradient-to-r from-blue-900 via-purple-900 to-orange-900 hover:from-blue-800 hover:to-orange-800 border border-blue-700/50' 
+                      : 'bg-gradient-to-r from-blue-50 via-purple-50 to-orange-50 hover:from-blue-100 hover:to-orange-100 border border-blue-200'
+                  }`}
+                >
+                  <Download className={darkMode ? 'text-blue-400' : 'text-blue-600'} size={20} />
+                  <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                    Export as JSON
+                  </span>
+                </button>
+                <button
+                  onClick={handleExportPDF}
+                  className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${
+                    darkMode 
+                      ? 'bg-gradient-to-r from-orange-900 via-purple-900 to-blue-900 hover:from-orange-800 hover:to-blue-800 border border-orange-700/50' 
+                      : 'bg-gradient-to-r from-orange-50 via-purple-50 to-blue-50 hover:from-orange-100 hover:to-blue-100 border border-orange-200'
+                  }`}
+                >
+                  <Download className={darkMode ? 'text-orange-400' : 'text-orange-600'} size={20} />
+                  <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                    Export as PDF
+                  </span>
+                </button>
+              </div>
               
               <button
                 onClick={() => setShowClearDataModal(true)}

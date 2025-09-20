@@ -4,7 +4,7 @@ import { Moon, Shield, TrendingUp, Heart } from 'lucide-react';
 
 const Landing: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-white">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-4xl mx-auto">
@@ -17,7 +17,7 @@ const Landing: React.FC = () => {
           
           <h2 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             Finally, a sleep app that{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
               reduces anxiety
             </span>{' '}
             instead of causing it
@@ -32,7 +32,7 @@ const Landing: React.FC = () => {
               <TrendingUp className="text-red-400" size={24} />
               <span className="text-lg font-semibold">Gen Z Sleep Crisis</span>
             </div>
-            <p className="text-2xl font-bold text-orange-400">
+            <p className="text-2xl font-bold text-indigo-400">
               40% of Gen Z experiences sleep anxiety 3+ times weekly
             </p>
             <p className="text-gray-300 mt-2">
@@ -42,7 +42,7 @@ const Landing: React.FC = () => {
           
           <Link
             to="/onboarding"
-            className="inline-block bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600 text-white text-xl font-bold py-4 px-12 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl"
+            className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xl font-bold py-4 px-12 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl"
           >
             Start Sleeping Better Tonight
           </Link>
@@ -80,14 +80,14 @@ const Landing: React.FC = () => {
       
       {/* CTA Section */}
       <div className="container mx-auto px-4 py-16 text-center">
-        <div className="bg-gradient-to-r from-purple-600/20 to-orange-500/20 backdrop-blur-sm rounded-3xl p-12 max-w-3xl mx-auto">
+        <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 backdrop-blur-sm rounded-3xl p-12 max-w-3xl mx-auto">
           <h3 className="text-3xl font-bold mb-4">Ready to break the anxiety cycle?</h3>
           <p className="text-xl text-gray-300 mb-8">
             Join thousands who've found peace with their sleep through privacy-first AI coaching.
           </p>
           <Link
             to="/onboarding"
-            className="inline-block bg-white text-purple-900 text-lg font-bold py-3 px-10 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
+            className="inline-block bg-white text-indigo-900 text-lg font-bold py-3 px-10 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
           >
             Get Started - It's Free
           </Link>

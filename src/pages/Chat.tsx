@@ -58,14 +58,14 @@ const Chat: React.FC<ChatProps> = ({ darkMode }) => {
     setMessages(newMessages);
     setIsLoading(true);
     
-    // Generate AI response
+    // Simulate AI response
     setTimeout(() => {
       const data = loadData();
       const context = {
         recentEntries: data.sleepEntries.slice(-7),
-        commonTriggers: ['Academic Stress', 'Overthinking'], // This would be calculated
-        averageAnxiety: 6, // This would be calculated
-        improvementTrend: false // This would be calculated
+        commonTriggers: ['Academic Stress', 'Overthinking'],
+        averageAnxiety: 6,
+        improvementTrend: false
       };
       
       const aiResponse: ChatMessage = {
@@ -89,7 +89,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode }) => {
         utterance.pitch = 1;
         speechSynthesis.speak(utterance);
       }
-    }, 1000 + Math.random() * 1000); // Random delay for realism
+    }, 1000 + Math.random() * 1000);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -130,6 +130,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode }) => {
       setIsRecording(false);
     }
   };
+
   
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-blue-100'} flex flex-col`}>
@@ -151,16 +152,18 @@ const Chat: React.FC<ChatProps> = ({ darkMode }) => {
               </div>
             </div>
             
-            <button
-              onClick={() => setAudioEnabled(!audioEnabled)}
-              className={`p-2 rounded-lg ${
-                audioEnabled 
-                  ? darkMode ? 'text-purple-400' : 'text-purple-600'
-                  : darkMode ? 'text-gray-400' : 'text-gray-600'
-              }`}
-            >
-              {audioEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setAudioEnabled(!audioEnabled)}
+                className={`p-2 rounded-lg ${
+                  audioEnabled 
+                    ? darkMode ? 'text-purple-400' : 'text-purple-600'
+                    : darkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}
+              >
+                {audioEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -79,45 +79,62 @@ const OnboardingAssessment: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 relative overflow-hidden">
+      {/* Enhanced background pattern */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-20 w-40 h-40 bg-indigo-400 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-32 w-32 h-32 bg-purple-400 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-32 left-1/3 w-36 h-36 bg-blue-400 rounded-full blur-2xl animate-pulse delay-2000"></div>
+        <div className="absolute top-1/2 right-1/4 w-28 h-28 bg-pink-400 rounded-full blur-xl animate-pulse delay-500"></div>
+      </div>
+      
+      <div className="container mx-auto px-6 py-16 max-w-4xl relative z-10">
+        <div className="max-w-3xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <Moon className="text-orange-400" size={32} />
-              <h1 className="text-2xl font-bold">SleepSense AI</h1>
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center space-x-6 mb-12">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-3xl blur-lg opacity-50"></div>
+                <div className="relative p-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl shadow-2xl">
+                  <Moon className="text-white" size={40} />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-5xl font-bold text-white mb-2">SleepSense AI</h1>
+                <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mx-auto"></div>
+              </div>
             </div>
-            
-            <h2 className="text-2xl font-bold mb-2">Sleep Anxiety Assessment</h2>
-            <p className="text-gray-300">
-              Help me understand your sleep anxiety patterns
+            <h2 className="text-5xl font-bold mb-8 text-white leading-tight">Sleep Anxiety Assessment</h2>
+            <p className="text-xl text-indigo-200 max-w-2xl mx-auto leading-relaxed">
+              Help us understand your sleep anxiety patterns so we can provide personalized support.
             </p>
           </div>
           
           {/* Progress */}
-          <div className="mb-8">
-            <div className="flex justify-between text-sm text-gray-400 mb-2">
-              <span>Question {currentQuestion + 1} of {questions.length}</span>
-              <span>{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-purple-600 to-orange-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-              ></div>
+          <div className="mb-12">
+            <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+              <div className="flex justify-between text-lg text-indigo-200 mb-4">
+                <span>Question {currentQuestion + 1} of {questions.length}</span>
+                <span>{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</span>
+              </div>
+              <div className="w-full bg-white/20 rounded-full h-3">
+                <div 
+                  className="bg-gradient-to-r from-indigo-400 to-purple-400 h-3 rounded-full transition-all duration-300"
+                  style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                ></div>
+              </div>
             </div>
           </div>
           
           {/* Question */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-8">
-            <h3 className="text-lg font-semibold text-purple-400 mb-2">
+          <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-10 mb-12">
+            <h3 className="text-2xl font-semibold text-indigo-300 mb-4">
               {currentQ.title}
             </h3>
-            <h4 className="text-xl font-bold mb-3">
+            <h4 className="text-3xl font-bold mb-6 text-white">
               {currentQ.question}
             </h4>
-            <p className="text-gray-300 text-sm mb-6">
+            <p className="text-lg text-indigo-200 mb-10 leading-relaxed">
               {currentQ.description}
             </p>
             
@@ -130,29 +147,29 @@ const OnboardingAssessment: React.FC = () => {
           </div>
           
           {/* Navigation */}
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-8">
             <button
               onClick={handlePrevious}
-              className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="flex items-center space-x-3 px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-indigo-200 transition-all duration-200 text-lg border border-white/30 backdrop-blur-sm"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={24} />
               <span>Previous</span>
             </button>
             
             <button
               onClick={handleNext}
-              className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600 text-white font-semibold transition-colors"
+              className="flex items-center space-x-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-semibold transition-all duration-200 text-lg shadow-2xl hover:shadow-3xl"
             >
               <span>{currentQuestion < questions.length - 1 ? 'Next' : 'Complete'}</span>
-              <ArrowRight size={20} />
+              <ArrowRight size={24} />
             </button>
           </div>
           
           {/* Encouragement */}
           {userData.user && (
-            <div className="text-center mt-8 p-4 bg-purple-900/30 rounded-xl">
-              <p className="text-sm text-gray-300">
-                You're doing great, {userData.user.name}! These questions help me provide personalized support for your sleep anxiety.
+            <div className="text-center mt-12 p-8 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 shadow-2xl">
+              <p className="text-lg text-indigo-200">
+                You're doing great, {userData.user.name}! These questions help us provide personalized support for your sleep anxiety.
               </p>
             </div>
           )}

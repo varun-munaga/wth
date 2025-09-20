@@ -41,6 +41,7 @@ const TriggerCheckboxes: React.FC<TriggerCheckboxesProps> = ({ selectedTriggers,
           return (
             <button
               key={trigger.id}
+              type="button"
               onClick={() => toggleTrigger(trigger.id)}
               className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
                 isSelected
