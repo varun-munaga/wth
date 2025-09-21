@@ -1,317 +1,466 @@
-import React, { useEffect, useState } from 'react';
-import { TrendingUp, Calendar, Target, Award } from 'lucide-react';
-import { Line, Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-} from 'chart.js';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  ArrowLeft, 
+  TrendingUp, 
+  TrendingDown, 
+  Moon, 
+  Heart, 
+  Calendar,
+  BarChart3,
+  Award,
+  Target,
+  Lightbulb,
+  Clock,
+  Brain,
+  Zap,
+  Star,
+  Activity
+} from 'lucide-react';
 import { loadData } from '../utils/storage';
-import { generateDemoEntries } from '../utils/demoData';
-import { format, subDays } from 'date-fns';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
-
-interface InsightsProps {
-  darkMode: boolean;
+interface InsightData {
+  entries?: Array<{
+    id: string;
+    type: string;
+    date: string;
+    anxietyLevel?: number;
+    sleepQuality?: number;
+    energyLevel?: number;
+    bedtime?: string;
+    wakeTime?: string;
+    triggers?: string[];
+    notes?: string;
+  }>;
+  user?: {
+    name: string;
+  };
 }
 
-const Insights: React.FC<InsightsProps> = ({ darkMode }) => {
-  const [data, setData] = useState(loadData());
-  
+const Insights: React.FC = () => {
+  const [data, setData] = useState<InsightData>({});
+  const [selectedPeriod, setSelectedPeriod] = useState('7d');
+  const [isLoading, setIsLoading] = useState(true);
+  const [animateStats, setAnimateStats] = useState(false);
+
   useEffect(() => {
-    const appData = loadData();
-    if (appData.settings.demoMode && appData.sleepEntries.length === 0) {
-      const demoEntries = generateDemoEntries();
-      setData({ ...appData, sleepEntries: demoEntries });
-    } else {
-      setData(appData);
-    }
+    const loadInsights = async () => {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      const insightData = loadData();
+      setData(insightData);
+      setIsLoading(false);
+      
+      setTimeout(() => setAnimateStats(true), 500);
+    };
+
+    loadInsights();
   }, []);
-  
-  // Process data for charts
-  const last14Days = Array.from({ length: 14 }, (_, i) => {
-    const date = subDays(new Date(), 13 - i);
-    return format(date, 'yyyy-MM-dd');
-  });
-  
-  const anxietyData = last14Days.map(date => {
-    const entry = data.sleepEntries.find(e => e.date === date && e.type === 'evening');
-    return entry?.anxietyLevel || null;
-  });
-  
-  const sleepQualityData = last14Days.map(date => {
-    const entry = data.sleepEntries.find(e => e.date === date && e.type === 'morning');
-    return entry?.sleepQuality || null;
-  });
-  
-  // Calculate statistics
-  const validAnxietyData = anxietyData.filter(val => val !== null) as number[];
-  const validSleepData = sleepQualityData.filter(val => val !== null) as number[];
-  
-  const avgAnxiety = validAnxietyData.length > 0 
-    ? Math.round((validAnxietyData.reduce((sum, val) => sum + val, 0) / validAnxietyData.length) * 10) / 10
-    : null;
+
+  const getFilteredEntries = () => {
+    const entries = data.entries || [];
+    const now = new Date();
+    const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
+    const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
     
-  const avgSleepQuality = validSleepData.length > 0 
-    ? Math.round((validSleepData.reduce((sum, val) => sum + val, 0) / validSleepData.length) * 10) / 10
-    : null;
-  
-  // Calculate improvement
-  const firstWeekAnxiety = validAnxietyData.slice(0, 7);
-  const secondWeekAnxiety = validAnxietyData.slice(7);
-  const anxietyImprovement = firstWeekAnxiety.length > 0 && secondWeekAnxiety.length > 0
-    ? Math.round(((firstWeekAnxiety.reduce((sum, val) => sum + val, 0) / firstWeekAnxiety.length) - 
-                 (secondWeekAnxiety.reduce((sum, val) => sum + val, 0) / secondWeekAnxiety.length)) * 10) / 10
-    : null;
-  
-  // Trigger frequency data
-  const allTriggers = data.sleepEntries
-    .filter(entry => entry.type === 'evening' && entry.triggers)
-    .flatMap(entry => entry.triggers || []);
+    return entries.filter(entry => new Date(entry.date) >= cutoffDate);
+  };
+
+  const calculateStats = () => {
+    const entries = getFilteredEntries();
+    if (entries.length === 0) return null;
+
+    const avgSleep = entries.reduce((sum, entry) => sum + (entry.sleepQuality || 0), 0) / entries.length;
+    const avgAnxiety = entries.reduce((sum, entry) => sum + (entry.anxietyLevel || 0), 0) / entries.length;
+    const avgEnergy = entries.reduce((sum, entry) => sum + (entry.energyLevel || 0), 0) / entries.length;
+
+    // Calculate trends (compare first half vs second half)
+    const midpoint = Math.floor(entries.length / 2);
+    const firstHalf = entries.slice(0, midpoint);
+    const secondHalf = entries.slice(midpoint);
+
+    const firstHalfSleep = firstHalf.reduce((sum, entry) => sum + (entry.sleepQuality || 0), 0) / firstHalf.length || 0;
+    const secondHalfSleep = secondHalf.reduce((sum, entry) => sum + (entry.sleepQuality || 0), 0) / secondHalf.length || 0;
+    const sleepTrend = secondHalfSleep - firstHalfSleep;
+
+    const firstHalfAnxiety = firstHalf.reduce((sum, entry) => sum + (entry.anxietyLevel || 0), 0) / firstHalf.length || 0;
+    const secondHalfAnxiety = secondHalf.reduce((sum, entry) => sum + (entry.anxietyLevel || 0), 0) / secondHalf.length || 0;
+    const anxietyTrend = firstHalfAnxiety - secondHalfAnxiety; // Lower anxiety is better
+
+    return {
+      avgSleep,
+      avgAnxiety,
+      avgEnergy,
+      sleepTrend,
+      anxietyTrend,
+      totalEntries: entries.length
+    };
+  };
+
+  const getMostCommonTriggers = () => {
+    const entries = getFilteredEntries();
+    const triggerCounts: { [key: string]: number } = {};
     
-  const triggerCounts = allTriggers.reduce((acc, trigger) => {
-    acc[trigger] = (acc[trigger] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 10,
-        grid: {
-          color: darkMode ? '#374151' : '#f3f4f6'
-        },
-        ticks: {
-          color: darkMode ? '#9CA3AF' : '#6B7280'
-        }
-      },
-      x: {
-        grid: {
-          color: darkMode ? '#374151' : '#f3f4f6'
-        },
-        ticks: {
-          color: darkMode ? '#9CA3AF' : '#6B7280'
-        }
-      }
-    },
-    plugins: {
-      legend: {
-        labels: {
-          color: darkMode ? '#F9FAFB' : '#374151'
-        }
-      }
+    entries.forEach(entry => {
+      entry.triggers?.forEach(trigger => {
+        triggerCounts[trigger] = (triggerCounts[trigger] || 0) + 1;
+      });
+    });
+
+    return Object.entries(triggerCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([trigger, count]) => ({ trigger, count }));
+  };
+
+  const getPersonalizedInsights = () => {
+    const stats = calculateStats();
+    const triggers = getMostCommonTriggers();
+    const insights = [];
+
+    if (!stats) return ["Start tracking your sleep to unlock personalized insights!"];
+
+    // Sleep quality insights
+    if (stats.avgSleep >= 7) {
+      insights.push("🌟 Excellent! Your sleep quality is consistently good. Keep up the great work!");
+    } else if (stats.avgSleep >= 5) {
+      insights.push("📈 Your sleep quality is moderate. Let's work on some improvements together.");
+    } else {
+      insights.push("💙 I see you're struggling with sleep quality. Remember, every small step counts.");
     }
-  };
-  
-  const lineChartData = {
-    labels: last14Days.map(date => format(new Date(date), 'M/d')),
-    datasets: [
-      {
-        label: 'Anxiety Level',
-        data: anxietyData,
-        borderColor: '#EF4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        tension: 0.3,
-        spanGaps: true
-      },
-      {
-        label: 'Sleep Quality',
-        data: sleepQualityData,
-        borderColor: '#10B981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.3,
-        spanGaps: true
-      }
-    ]
-  };
-  
-  const doughnutData = {
-    labels: Object.keys(triggerCounts),
-    datasets: [
-      {
-        data: Object.values(triggerCounts),
-        backgroundColor: [
-          '#8B5CF6', '#F59E0B', '#EF4444', '#10B981',
-          '#3B82F6', '#F97316', '#6366F1', '#84CC16'
-        ],
-        borderWidth: 0
-      }
-    ]
-  };
-  
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-        labels: {
-          color: darkMode ? '#F9FAFB' : '#374151',
-          padding: 20,
-          usePointStyle: true
-        }
-      }
+
+    // Sleep trend insights
+    if (stats.sleepTrend > 0.5) {
+      insights.push("🚀 Amazing progress! Your sleep quality has been improving over time.");
+    } else if (stats.sleepTrend < -0.5) {
+      insights.push("🤗 Your sleep has been challenging lately. Let's focus on what might help.");
     }
+
+    // Anxiety insights
+    if (stats.avgAnxiety <= 3) {
+      insights.push("✨ Great job managing your anxiety levels! Your hard work is paying off.");
+    } else if (stats.anxietyTrend > 0.5) {
+      insights.push("💪 I notice your anxiety levels have been decreasing. That's wonderful progress!");
+    }
+
+    // Trigger insights
+    if (triggers.length > 0) {
+      const topTrigger = triggers[0];
+      insights.push(`🔍 Your most common anxiety trigger is "${topTrigger.trigger}". Let's work on strategies for this.`);
+    }
+
+    // Consistency insights
+    if (stats.totalEntries >= 7) {
+      insights.push("🎯 You're building an excellent tracking habit! Consistency is key to better sleep.");
+    }
+
+    return insights.length > 0 ? insights : ["Keep tracking your sleep to unlock more insights!"];
   };
-  
-  if (data.sleepEntries.length === 0) {
+
+  const stats = calculateStats();
+  const insights = getPersonalizedInsights();
+  const commonTriggers = getMostCommonTriggers();
+
+  if (isLoading) {
     return (
-      <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-20`}>
-        <div className="container mx-auto px-4 py-6 max-w-2xl lg:max-w-4xl">
-          <h1 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            Insights & Trends
-          </h1>
-          
-          <div className={`p-8 rounded-2xl text-center ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border`}>
-            <TrendingUp className={`mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`} size={48} />
-            <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Start Your Journey
-            </h3>
-            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Complete a few check-ins to see your personalized insights and progress trends.
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-300">Analyzing your sleep patterns...</p>
         </div>
       </div>
     );
   }
-  
+
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-20`}>
-      <div className="container mx-auto px-4 py-6 max-w-2xl lg:max-w-4xl">
-        {/* Header */}
-        <h1 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-          Insights & Trends
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
         
-  {/* Statistics Cards */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className={`p-6 rounded-2xl text-center ${
-            darkMode ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-700/50' : 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200'
-          } border`}>
-            <div className={`text-2xl font-bold mb-1 ${
-              avgAnxiety !== null && avgAnxiety <= 4 ? 'text-green-500' : 
-              avgAnxiety !== null && avgAnxiety <= 7 ? 'text-yellow-500' : 'text-red-500'
-            }`}>
-              {avgAnxiety || '--'}
-            </div>
-            <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Avg Anxiety
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 animate-fade-in-down">
+          <div className="flex items-center space-x-4">
+            <Link 
+              to="/dashboard" 
+              className="p-3 hover:bg-white/20 dark:hover:bg-slate-800/20 rounded-xl transition-all duration-300 hover:scale-110 group"
+            >
+              <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+            </Link>
+            <div>
+              <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-1 flex items-center space-x-2">
+                <BarChart3 className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+                <span>Sleep Insights</span>
+              </h1>
+              <p className="text-lg text-slate-600 dark:text-slate-300">Discover patterns and improve your sleep</p>
             </div>
           </div>
           
-          <div className={`p-6 rounded-2xl text-center ${
-            darkMode ? 'bg-gradient-to-br from-green-900/50 to-emerald-900/50 border-green-700/50' : 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
-          } border`}>
-            <div className={`text-2xl font-bold mb-1 ${
-              avgSleepQuality !== null && avgSleepQuality >= 7 ? 'text-green-500' : 
-              avgSleepQuality !== null && avgSleepQuality >= 4 ? 'text-yellow-500' : 'text-red-500'
-            }`}>
-              {avgSleepQuality || '--'}
-            </div>
-            <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Avg Sleep Quality
-            </div>
+          {/* Time Period Selector */}
+          <div className="flex items-center space-x-2 mt-4 lg:mt-0">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-300 mr-3">Time Period:</span>
+            {[
+              { value: '7d', label: '7 Days' },
+              { value: '30d', label: '30 Days' },
+              { value: '90d', label: '90 Days' }
+            ].map((period) => (
+              <button
+                key={period.value}
+                onClick={() => setSelectedPeriod(period.value)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  selectedPeriod === period.value
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                    : 'bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                {period.label}
+              </button>
+            ))}
           </div>
         </div>
-        
-        {/* Progress Celebration */}
-        {anxietyImprovement !== null && anxietyImprovement > 0 && (
-          <div className={`p-6 rounded-2xl mb-8 text-center ${
-            darkMode ? 'bg-gradient-to-r from-green-900/30 to-emerald-900/30 border-green-700/50' : 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'
-          } border md:max-w-lg mx-auto`}>
-            <Award className={`mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} size={40} />
-            <h3 className={`text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Amazing Progress! 🎉
-            </h3>
-            <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              Your anxiety decreased by {anxietyImprovement} points this week!
-            </p>
-          </div>
-        )}
-        
-        {/* Trends Chart */}
-        <div className={`p-6 rounded-2xl mb-8 ${
-          darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } border shadow-sm md:max-w-2xl mx-auto`}>
-          <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            14-Day Trends
-          </h3>
-          <div style={{ height: '280px' }}>
-            <Line data={lineChartData} options={chartOptions} />
-          </div>
-        </div>
-        
-        {/* Trigger Analysis */}
-        {Object.keys(triggerCounts).length > 0 && (
-          <div className={`p-6 rounded-2xl mb-8 ${
-            darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          } border shadow-sm md:max-w-lg mx-auto`}>
-            <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              Anxiety Triggers
-            </h3>
-            <div style={{ height: '220px' }}>
-              <Doughnut data={doughnutData} options={doughnutOptions} />
-            </div>
-          </div>
-        )}
-        
-        {/* Insights */}
-        <div className={`p-6 rounded-2xl mb-8 ${
-          darkMode ? 'bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border-indigo-700/50' : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200'
-        } border md:max-w-2xl mx-auto`}>
-          <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            Personal Insights
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {data.settings.demoMode ? (
-              <>
-                <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                  <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                    📱 <strong>Social Media Impact:</strong> You sleep 2.3 points better on nights when you avoid social media after 9 PM.
-                  </p>
+
+        {stats ? (
+          <>
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              
+              {/* Sleep Quality Card */}
+              <div className={`card-gradient bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 ${animateStats ? 'animate-fade-in-up' : 'opacity-0'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Moon className="w-8 h-8" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-blue-100 text-sm font-medium">Avg Sleep Quality</p>
+                    <p className="text-3xl font-bold">{stats.avgSleep.toFixed(1)}/10</p>
+                  </div>
                 </div>
-                <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                  <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                    🧠 <strong>Overthinking Pattern:</strong> Your anxiety peaks on Sunday nights. Consider creating a calming Sunday evening routine.
-                  </p>
+                <div className="flex items-center space-x-2">
+                  {stats.sleepTrend > 0.2 ? (
+                    <TrendingUp className="w-4 h-4 text-emerald-300" />
+                  ) : stats.sleepTrend < -0.2 ? (
+                    <TrendingDown className="w-4 h-4 text-red-300" />
+                  ) : (
+                    <Activity className="w-4 h-4 text-blue-200" />
+                  )}
+                  <span className="text-blue-100 text-sm">
+                    {Math.abs(stats.sleepTrend).toFixed(1)} trend
+                  </span>
                 </div>
-                <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                  <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                    📚 <strong>Academic Stress:</strong> You're making great progress managing exam anxiety. Your sleep quality improved 40% this week!
-                  </p>
-                </div>
-              </>
-            ) : (
-              <div className={`p-4 rounded-xl text-center ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                <p className={`text-base ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Keep tracking for more personalized insights! I'll identify patterns unique to your sleep journey.
-                </p>
               </div>
-            )}
+
+              {/* Anxiety Level Card */}
+              <div className={`card-gradient bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 ${animateStats ? 'animate-fade-in-up delay-100' : 'opacity-0'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Heart className="w-8 h-8" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-purple-100 text-sm font-medium">Avg Anxiety Level</p>
+                    <p className="text-3xl font-bold">{stats.avgAnxiety.toFixed(1)}/10</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {stats.anxietyTrend > 0.2 ? (
+                    <TrendingDown className="w-4 h-4 text-emerald-300" />
+                  ) : stats.anxietyTrend < -0.2 ? (
+                    <TrendingUp className="w-4 h-4 text-red-300" />
+                  ) : (
+                    <Activity className="w-4 h-4 text-purple-200" />
+                  )}
+                  <span className="text-purple-100 text-sm">
+                    {stats.anxietyTrend > 0 ? 'Improving' : stats.anxietyTrend < 0 ? 'Needs attention' : 'Stable'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Energy Level Card */}
+              <div className={`card-gradient bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 ${animateStats ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Zap className="w-8 h-8" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-orange-100 text-sm font-medium">Avg Energy Level</p>
+                    <p className="text-3xl font-bold">{stats.avgEnergy.toFixed(1)}/10</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Activity className="w-4 h-4 text-orange-200" />
+                  <span className="text-orange-100 text-sm">
+                    {stats.avgEnergy > 6 ? 'High energy' : stats.avgEnergy > 4 ? 'Moderate' : 'Low energy'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Total Entries Card */}
+              <div className={`card-gradient bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 ${animateStats ? 'animate-fade-in-up delay-300' : 'opacity-0'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Calendar className="w-8 h-8" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-emerald-100 text-sm font-medium">Total Entries</p>
+                    <p className="text-3xl font-bold">{stats.totalEntries}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Target className="w-4 h-4 text-emerald-200" />
+                  <span className="text-emerald-100 text-sm">
+                    {selectedPeriod === '7d' ? 'Last 7 days' : selectedPeriod === '30d' ? 'Last 30 days' : 'Last 90 days'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              
+              {/* Personal Insights */}
+              <div className="card rounded-2xl p-6 animate-fade-in-left">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
+                    <Lightbulb className="w-6 h-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Personal Insights</h2>
+                </div>
+                <div className="space-y-4">
+                  {insights.map((insight, index) => (
+                    <div
+                      key={index}
+                      className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800 animate-fade-in-up"
+                      style={{ animationDelay: `${index * 200}ms` }}
+                    >
+                      <p className="text-purple-800 dark:text-purple-200 leading-relaxed">{insight}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Common Triggers */}
+              <div className="card rounded-2xl p-6 animate-fade-in-right">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl">
+                    <Brain className="w-6 h-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Common Anxiety Triggers</h2>
+                </div>
+                {commonTriggers.length > 0 ? (
+                  <div className="space-y-3">
+                    {commonTriggers.map((trigger, index) => (
+                      <div
+                        key={trigger.trigger}
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors animate-fade-in-up"
+                        style={{ animationDelay: `${index * 150}ms` }}
+                      >
+                        <span className="font-medium text-slate-800 dark:text-white capitalize">
+                          {trigger.trigger.replace('_', ' ')}
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-slate-600 dark:text-slate-400">
+                            {trigger.count} times
+                          </span>
+                          <div 
+                            className="w-16 h-2 bg-red-200 dark:bg-red-800 rounded-full"
+                          >
+                            <div 
+                              className="h-2 bg-gradient-to-r from-red-500 to-pink-600 rounded-full transition-all duration-1000"
+                              style={{ 
+                                width: `${(trigger.count / Math.max(...commonTriggers.map(t => t.count))) * 100}%` 
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Brain className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                    <p className="text-slate-600 dark:text-slate-400">
+                      No anxiety triggers recorded yet. Keep tracking to identify patterns!
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Achievement Section */}
+            <div className="mt-8 card rounded-2xl p-6 animate-fade-in-up">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="p-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl">
+                  <Award className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Your Achievements</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Tracking Streak */}
+                <div className="text-center p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-emerald-800 dark:text-emerald-200 mb-1">
+                    {stats.totalEntries} Days Tracked
+                  </h3>
+                  <p className="text-sm text-emerald-700 dark:text-emerald-300">Building consistency!</p>
+                </div>
+
+                {/* Sleep Quality Badge */}
+                {stats.avgSleep >= 7 && (
+                  <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                      <Star className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-1">Sleep Master</h3>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">Excellent sleep quality!</p>
+                  </div>
+                )}
+
+                {/* Anxiety Management Badge */}
+                {stats.anxietyTrend > 0.5 && (
+                  <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                      <Heart className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-purple-800 dark:text-purple-200 mb-1">Calm Mind</h3>
+                    <p className="text-sm text-purple-700 dark:text-purple-300">Anxiety improving!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          /* No Data State */
+          <div className="text-center py-16 animate-fade-in-up">
+            <div className="max-w-md mx-auto">
+              <BarChart3 className="w-24 h-24 text-slate-400 mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-4">
+                No Data Yet
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
+                Start tracking your sleep to unlock personalized insights and see your progress over time.
+              </p>
+              <div className="space-y-4">
+                <Link
+                  to="/evening-checkin"
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg"
+                >
+                  <Moon className="w-5 h-5" />
+                  <span>Start Evening Check-in</span>
+                </Link>
+                <div className="text-center">
+                  <span className="text-slate-500 dark:text-slate-400">or</span>
+                </div>
+                <Link
+                  to="/morning-reflection"
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-300 hover:scale-105 shadow-lg"
+                >
+                  <Zap className="w-5 h-5" />
+                  <span>Start Morning Reflection</span>
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -7,11 +7,13 @@ export interface User {
 }
 
 export interface AnxietyAssessment {
-  sleepAnxietyLevel: number;
-  anxietyFrequency: number;
-  sleepQuality: number;
+  sleepIssues: string[];
+  anxietyTriggers: string[];
+  sleepGoals: string[];
+  currentBedtime: string;
+  avgSleepTime: string;
   stressLevel: number;
-  previousHelp: number;
+  completedAt: string;
 }
 
 export interface SleepEntry {
@@ -43,6 +45,7 @@ export interface AppData {
   user: User | null;
   assessment: AnxietyAssessment | null;
   sleepEntries: SleepEntry[];
+  entries: SleepEntry[];
   chatHistory: ChatMessage[];
   settings: {
     darkMode: boolean;
