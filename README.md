@@ -24,22 +24,10 @@ chmod +x setup-env.sh
 
 Update the environment files with your Tavus AI credentials:
 
-**Client (`client/.env`):**
-```env
-REACT_APP_API_URL=http://localhost:5000/api
-REACT_APP_TAVUS_API_KEY=your-tavus-api-key-here
-REACT_APP_TAVUS_REPLICA_ID=your-replica-id-here
-```
-
 **Server (`server/.env`):**
 ```env
 PORT=5000
 NODE_ENV=development
-CLIENT_URL=http://localhost:3000
-TAVUS_API_KEY=your-tavus-api-key-here
-TAVUS_REPLICA_ID=your-replica-id-here
-TAVUS_BASE_URL=https://api.tavus.io/v1
-```
 
 ### 3. Start Development Servers
 
