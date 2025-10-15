@@ -41,27 +41,22 @@ const EveningCheckin: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const navigate = useNavigate();
 
-  const anxietyEmojis = ['😴', '😊', '😐', '😟', '😰', '😨', '😱', '🆘', '💔', '🔥'];
+  const anxietyEmojis = ['😌', '🙂', '😊', '🤔', '😕', '😟', '😥', '😓', '😖', '😣'];
   
   const triggerOptions = [
     { id: 'academic', label: 'Academic Stress', icon: BookOpen, color: 'from-blue-500 to-blue-600', description: 'Exams, assignments, grades' },
     { id: 'work', label: 'Work Pressure', icon: Briefcase, color: 'from-purple-500 to-purple-600', description: 'Deadlines, meetings, projects' },
     { id: 'relationships', label: 'Relationships', icon: Users, color: 'from-pink-500 to-pink-600', description: 'Family, friends, romantic' },
     { id: 'health', label: 'Health Worries', icon: Heart, color: 'from-red-500 to-red-600', description: 'Physical or mental health concerns' },
-    { id: 'financial', label: 'Financial Stress', icon: DollarSign, color: 'from-green-500 to-green-600', description: 'Money, bills, future security' },
-    { id: 'social_media', label: 'Social Media/News', icon: Smartphone, color: 'from-indigo-500 to-indigo-600', description: 'Overwhelming information, FOMO' },
-    { id: 'overthinking', label: 'Overthinking', icon: Brain, color: 'from-orange-500 to-orange-600', description: 'Racing thoughts, rumination' },
-    { id: 'sleep_fear', label: 'Fear of Not Sleeping', icon: Bed, color: 'from-slate-500 to-slate-600', description: 'Anxiety about sleep itself' }
+    { id: 'financial', label: 'Financial Stress', icon: DollarSign, color: 'from-green-500 to-green-600', description: 'Money, bills, expenses' },
+    { id: 'technology', label: 'Digital Overload', icon: Smartphone, color: 'from-indigo-500 to-indigo-600', description: 'Social media, screen time' }
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     setIsSubmitting(true);
-
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const entry = {
+    
+    // Create a new entry
+    const newEntry = {
       id: Date.now().toString(),
       type: 'evening',
       date: new Date().toISOString().split('T')[0],
@@ -72,69 +67,115 @@ const EveningCheckin: React.FC = () => {
       voiceNote: formData.voiceNote,
       timestamp: new Date().toISOString()
     };
-
-    const data = loadData();
-    data.entries = [...(data.entries || []), entry];
-    saveData(data);
-
+    
+    // Load existing data
+    const appData = loadData();
+    
+    // Ensure sleepEntries array exists
+    if (!appData.sleepEntries) {
+      appData.sleepEntries = [];
+    }
+    
+    // Add new entry
+    appData.sleepEntries = [newEntry, ...appData.sleepEntries];
+    
+    // Also add to entries for backward compatibility
+    if (!appData.entries) {
+      appData.entries = [];
+    }
+    appData.entries = [newEntry, ...appData.entries];
+    
+    // Save updated data
+    saveData(appData);
+    
+    // Navigate to dashboard
     navigate('/dashboard');
   };
-
+  
   const toggleTrigger = (triggerId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      triggers: prev.triggers.includes(triggerId)
-        ? prev.triggers.filter(t => t !== triggerId)
-        : [...prev.triggers, triggerId]
-    }));
+    setFormData(prev => {
+      if (prev.triggers.includes(triggerId)) {
+        return {
+          ...prev,
+          triggers: prev.triggers.filter(id => id !== triggerId)
+        };
+      } else {
+        return {
+          ...prev,
+          triggers: [...prev.triggers, triggerId]
+        };
+      }
+    });
   };
-
+  
   const startVoiceRecording = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => setIsListening(true);
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setFormData(prev => ({ ...prev, notes: prev.notes + ' ' + transcript }));
-        setIsListening(false);
-      };
-      recognition.onerror = () => setIsListening(false);
-      recognition.onend = () => setIsListening(false);
-
-      recognition.start();
+    if (!isListening) {
+      setIsListening(true);
+      handleVoiceInput();
+    } else {
+      setIsListening(false);
     }
   };
-
+  
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Voice input is not supported in your browser. Try Chrome or Edge.');
+      return;
+    }
+    
+    // @ts-ignore
+    const recognition = new window.webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+    
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('');
+      
+      setFormData(prev => ({
+        ...prev,
+        voiceNote: transcript
+      }));
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      setIsListening(false);
+    };
+    
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    
+    recognition.start();
+  };
+  
   const getAnxietyMessage = (level: number) => {
-    if (level <= 2) return { text: "You're feeling quite calm tonight! 😌", color: "text-emerald-200" };
-    if (level <= 4) return { text: "A bit of worry is normal 💙", color: "text-blue-200" };
-    if (level <= 6) return { text: "Moderate anxiety - let's work through this 🫂", color: "text-amber-200" };
-    if (level <= 8) return { text: "High anxiety - you're not alone in this 💜", color: "text-purple-200" };
-    return { text: "Very high anxiety - let's focus on immediate comfort 🤗", color: "text-pink-200" };
+    if (level <= 3) return 'Low anxiety - Great job managing stress today!';
+    if (level <= 6) return 'Moderate anxiety - Take some deep breaths before bed';
+    return 'High anxiety - Consider a calming activity before sleep';
   };
-
+  
   const getAnxietyColor = (level: number) => {
-    if (level <= 2) return 'from-emerald-500 to-green-600';
-    if (level <= 4) return 'from-blue-500 to-cyan-600';
-    if (level <= 6) return 'from-amber-500 to-orange-600';
-    if (level <= 8) return 'from-orange-500 to-red-600';
-    return 'from-red-500 to-pink-600';
+    if (level <= 3) return 'from-green-500 to-teal-500';
+    if (level <= 6) return 'from-yellow-500 to-amber-500';
+    return 'from-red-500 to-rose-500';
   };
-
+  
   const nextStep = () => {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
   };
-
+  
   const prevStep = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
-
+  
   const isStepValid = () => {
     switch (currentStep) {
       case 1: return formData.anxietyLevel > 0;
@@ -144,61 +185,66 @@ const EveningCheckin: React.FC = () => {
       default: return false;
     }
   };
-
+  
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">How anxious are you about sleeping tonight?</h2>
-              <p className="text-indigo-200">Be honest - there are no wrong answers</p>
+              <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center space-x-2">
+                <Brain className="w-8 h-8 text-purple-400" />
+                <span>How's your anxiety level tonight?</span>
+              </h2>
+              <p className="text-indigo-200">Rate your current anxiety level before bed</p>
             </div>
-
-            <div className="space-y-6">
-              {/* Anxiety Level Display */}
-              <div className="text-center">
-                <div className={`inline-flex items-center space-x-4 bg-gradient-to-r ${getAnxietyColor(formData.anxietyLevel)} rounded-2xl px-8 py-6 shadow-lg animate-bounce-gentle`}>
-                  <span className="text-4xl">{anxietyEmojis[formData.anxietyLevel - 1] || '😐'}</span>
-                  <div>
-                    <div className="text-3xl font-bold text-white">{formData.anxietyLevel}/10</div>
-                    <div className={`text-sm font-medium ${getAnxietyMessage(formData.anxietyLevel).color}`}>
-                      {getAnxietyMessage(formData.anxietyLevel).text}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Enhanced Anxiety Slider */}
-              <div className="px-6">
-                <div className="relative">
+            
+            <div className="max-w-md mx-auto">
+              <div className="bg-gradient-to-r rounded-2xl p-6 shadow-lg" style={{backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))`}}>
+                <div className={`bg-gradient-to-r ${getAnxietyColor(formData.anxietyLevel)}`}>
                   <input
                     type="range"
                     min="1"
                     max="10"
                     value={formData.anxietyLevel}
                     onChange={(e) => setFormData(prev => ({ ...prev, anxietyLevel: parseInt(e.target.value) }))}
-                    className="slider w-full"
-                    style={{
-                      background: `linear-gradient(to right, ${getAnxietyColor(formData.anxietyLevel).replace('from-', '').replace(' to-', ', ')} 0%, ${getAnxietyColor(formData.anxietyLevel).replace('from-', '').replace(' to-', ', ')} ${(formData.anxietyLevel / 10) * 100}%, rgba(255,255,255,0.2) ${(formData.anxietyLevel / 10) * 100}%, rgba(255,255,255,0.2) 100%)`
-                    }}
+                    className="w-full h-4 bg-transparent rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
-                <div className="flex justify-between text-sm text-indigo-200 mt-3">
-                  <span className="flex items-center space-x-1">
-                    <span>😴</span>
-                    <span>Very Calm</span>
-                  </span>
-                  <span className="flex items-center space-x-1">
-                    <span>😰</span>
-                    <span>Very Anxious</span>
-                  </span>
-                </div>
+              </div>
+            </div>
+            
+            <div className="text-center mt-4">
+              <div className="flex justify-between items-center">
+                <span className="text-green-400 font-medium">Low</span>
+                <span className="text-yellow-400 font-medium">Medium</span>
+                <span className="text-red-400 font-medium">High</span>
+              </div>
+              
+              <div className="mt-6">
+                <div className="text-5xl mb-2">{anxietyEmojis[formData.anxietyLevel - 1]}</div>
+                <div className="text-xl font-medium text-white">{formData.anxietyLevel}/10</div>
+                <div className="text-indigo-200 mt-1">{getAnxietyMessage(formData.anxietyLevel)}</div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-2xl p-4 mt-6">
+              <div className="flex items-center">
+                <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${getAnxietyColor(formData.anxietyLevel)} mr-3 animate-pulse`}></div>
+                <p className="text-white text-sm">
+                  {formData.anxietyLevel <= 3 ? (
+                    "Your anxiety is low tonight. This is a great time to reflect on what's working well for you."
+                  ) : formData.anxietyLevel <= 6 ? (
+                    "You're experiencing moderate anxiety. Consider some gentle breathing exercises before bed."
+                  ) : (
+                    "Your anxiety is high tonight. It might help to write down your thoughts or try a guided meditation."
+                  )}
+                </p>
               </div>
             </div>
           </div>
         );
-
+        
       case 2:
         return (
           <div className="space-y-6">
@@ -229,251 +275,229 @@ const EveningCheckin: React.FC = () => {
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, bedtime: time }))}
                     className={`p-3 rounded-xl transition-all duration-300 hover:scale-105 ${
-                      formData.bedtime === time
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                        : 'bg-white/10 text-indigo-200 hover:bg-white/20'
+                      formData.bedtime === time 
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                        : 'bg-white/10 text-white/70 hover:bg-white/20'
                     }`}
                   >
                     {time}
                   </button>
                 ))}
               </div>
+              
+              <div className="mt-6 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-2xl p-4">
+                <div className="flex items-start">
+                  <Bed className="w-5 h-5 text-purple-400 mt-0.5 mr-3 flex-shrink-0" />
+                  <div>
+                    <p className="text-white text-sm">
+                      {parseInt(formData.bedtime.split(':')[0]) < 22 
+                        ? "Great choice! Going to bed before 10 PM can help optimize your sleep quality."
+                        : parseInt(formData.bedtime.split(':')[0]) < 23 
+                          ? "A good bedtime choice. Try to maintain consistency with this time."
+                          : "Consider if you can move your bedtime earlier for better sleep quality."}
+                    </p>
+                    <p className="text-indigo-200 text-xs mt-2">
+                      Consistent sleep schedules help regulate your body's internal clock.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );
-
+        
       case 3:
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">What's making you anxious tonight?</h2>
-              <p className="text-indigo-200">Select all that apply - it's okay to choose multiple things</p>
+              <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center space-x-2">
+                <Brain className="w-8 h-8 text-purple-400" />
+                <span>What triggered your anxiety today?</span>
+              </h2>
+              <p className="text-indigo-200">Select all that apply (optional)</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {triggerOptions.map((trigger) => {
-                const Icon = trigger.icon;
-                const isSelected = formData.triggers.includes(trigger.id);
-                
-                return (
-                  <button
-                    key={trigger.id}
-                    type="button"
-                    onClick={() => toggleTrigger(trigger.id)}
-                    className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 text-left ${
-                      isSelected
-                        ? `bg-gradient-to-r ${trigger.color} border-white/50 shadow-lg`
-                        : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/40'
-                    }`}
-                  >
-                    <div className="flex items-start space-x-4">
-                      <div className={`p-3 rounded-xl ${
-                        isSelected ? 'bg-white/20' : 'bg-white/10'
-                      }`}>
-                        <Icon className={`w-6 h-6 ${
-                          isSelected ? 'text-white' : 'text-indigo-200'
-                        }`} />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className={`font-semibold mb-1 ${
-                          isSelected ? 'text-white' : 'text-indigo-100'
+            <div className="max-w-md mx-auto">
+              <div className="grid grid-cols-2 gap-3">
+                {triggerOptions.map((trigger) => {
+                  const Icon = trigger.icon;
+                  const isSelected = formData.triggers.includes(trigger.id);
+                  
+                  return (
+                    <button
+                      key={trigger.id}
+                      type="button"
+                      onClick={() => toggleTrigger(trigger.id)}
+                      className={`p-4 rounded-xl transition-all duration-300 hover:scale-105 text-left ${
+                        isSelected 
+                          ? `bg-gradient-to-r ${trigger.color} text-white` 
+                          : 'bg-white/10 text-white/70 hover:bg-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          isSelected ? 'bg-white/20' : 'bg-white/10'
                         }`}>
-                          {trigger.label}
-                        </h3>
-                        <p className={`text-sm ${
-                          isSelected ? 'text-white/80' : 'text-indigo-300'
-                        }`}>
-                          {trigger.description}
-                        </p>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="ml-3">
+                          <div className="font-medium">{trigger.label}</div>
+                          <div className="text-xs opacity-80">{trigger.description}</div>
+                        </div>
+                        {isSelected && (
+                          <Check className="w-5 h-5 ml-auto" />
+                        )}
                       </div>
-                    </div>
-                    {isSelected && (
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center animate-scale-in shadow-lg">
-                        <Check className="w-5 h-5 text-green-600" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            
-            {formData.triggers.length > 0 && (
-              <div className="text-center animate-fade-in">
-                <p className="text-indigo-200 text-sm">
-                  Selected {formData.triggers.length} trigger{formData.triggers.length !== 1 ? 's' : ''} - you're being very self-aware! 💙
-                </p>
+                    </button>
+                  );
+                })}
               </div>
-            )}
+              
+              {formData.triggers.length > 0 && (
+                <div className="mt-6 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-2xl p-4">
+                  <div className="flex items-start">
+                    <Shield className="w-5 h-5 text-purple-400 mt-0.5 mr-3 flex-shrink-0" />
+                    <div>
+                      <p className="text-white text-sm">
+                        You've identified {formData.triggers.length} trigger{formData.triggers.length !== 1 ? 's' : ''}. 
+                        Recognizing your triggers is the first step to managing them.
+                      </p>
+                      <p className="text-indigo-200 text-xs mt-2">
+                        Tomorrow, we'll help you develop strategies to address these specific areas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
-
+        
       case 4:
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">Anything else on your mind?</h2>
-              <p className="text-indigo-200">Share whatever feels important - this is your safe space</p>
+              <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center space-x-2">
+                <BookOpen className="w-8 h-8 text-purple-400" />
+                <span>Any notes about today?</span>
+              </h2>
+              <p className="text-indigo-200">Add any thoughts or reflections (optional)</p>
             </div>
             
-            <div className="relative">
+            <div className="max-w-md mx-auto">
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="I'm feeling anxious because... (optional)"
-                rows={6}
-                className="form-control resize-none bg-white/20 border-white/30 text-white placeholder-indigo-300"
-              />
+                placeholder="Write your thoughts here..."
+                className="form-control h-32 bg-white/20 border-white/30 text-white"
+              ></textarea>
               
-              {/* Enhanced Voice Input Button */}
-              <button
-                type="button"
-                onClick={startVoiceRecording}
-                disabled={isListening}
-                className={`absolute bottom-6 right-6 p-3 rounded-xl transition-all duration-300 ${
-                  isListening 
-                    ? 'bg-red-500 text-white animate-pulse shadow-lg' 
-                    : 'bg-white/20 text-indigo-200 hover:bg-white/30 hover:text-white hover:scale-110'
-                }`}
-              >
-                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-              </button>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={startVoiceRecording}
+                  className={`w-full p-4 rounded-xl transition-all duration-300 flex items-center justify-center ${
+                    isListening 
+                      ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white' 
+                      : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  }`}
+                >
+                  {isListening ? (
+                    <>
+                      <MicOff className="w-5 h-5 mr-2" />
+                      <span>Stop Recording</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-5 h-5 mr-2" />
+                      <span>Record Voice Note</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              {formData.voiceNote && (
+                <div className="mt-4 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-2xl p-4">
+                  <div className="flex items-start">
+                    <Sparkles className="w-5 h-5 text-purple-400 mt-0.5 mr-3 flex-shrink-0" />
+                    <div>
+                      <p className="text-white text-sm font-medium mb-1">Your Voice Note:</p>
+                      <p className="text-indigo-200 text-sm italic">"{formData.voiceNote}"</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            
-            {isListening && (
-              <div className="text-center animate-fade-in">
-                <div className="inline-flex items-center space-x-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">🎤 Listening... Speak your thoughts</span>
-                </div>
-              </div>
-            )}
-
-            {formData.notes && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 animate-fade-in">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span className="text-sm font-medium text-purple-200">Your thoughts are safe here</span>
-                </div>
-                <p className="text-xs text-indigo-300">
-                  Thank you for sharing. Remember, acknowledging your feelings is the first step to managing them.
-                </p>
-              </div>
-            )}
           </div>
         );
-
+        
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 overflow-hidden">
-      {/* Enhanced animated background */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-500 rounded-full blur-3xl animate-float animation-delay-0"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-indigo-500 rounded-full blur-3xl animate-float animation-delay-1000"></div>
-        <div className="absolute top-3/4 left-1/2 w-72 h-72 bg-pink-500 rounded-full blur-3xl animate-float animation-delay-2000"></div>
-      </div>
-
-      <div className="relative z-10 container mx-auto px-6 py-8 max-w-4xl min-h-screen flex flex-col">
-        
-        {/* Enhanced Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in-down">
-          <div className="flex items-center space-x-4">
-            <Link 
-              to="/dashboard" 
-              className="p-3 hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-110 group"
-            >
-              <ArrowLeft className="w-6 h-6 text-indigo-200 group-hover:text-white" />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-1">Evening Check-in</h1>
-              <p className="text-indigo-200">Step {currentStep} of 4 - Take your time</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <button 
+            onClick={() => navigate(-1)}
+            className="btn btn--ghost"
+          >
+            <ArrowLeft className="w-5 h-5 mr-1" />
+            <span>Back</span>
+          </button>
           
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <Clock className="w-4 h-4 text-indigo-300" />
-              <span className="text-indigo-200 text-sm font-medium">
-                {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 bg-emerald-500/20 text-emerald-300 px-3 py-2 rounded-full text-sm">
-              <Shield className="w-3 h-3" />
-              <span>🔒 Private</span>
-            </div>
+          <div className="text-sm font-medium text-indigo-200">
+            Step {currentStep} of 4
           </div>
         </div>
-
-        {/* Progress Bar */}
-        <div className="mb-8 animate-fade-in-up">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-indigo-200">Progress</span>
-            <span className="text-sm font-medium text-indigo-200">{Math.round((currentStep / 4) * 100)}%</span>
-          </div>
-          <div className="w-full bg-white/20 rounded-full h-2">
+        
+        <div className="max-w-md mx-auto">
+          {/* Progress Bar */}
+          <div className="w-full h-2 bg-white/10 rounded-full mb-8">
             <div 
-              className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500 ease-out"
+              className="h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
               style={{ width: `${(currentStep / 4) * 100}%` }}
             ></div>
           </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-full max-w-2xl glass-card rounded-3xl p-8 animate-fade-in-up border border-white/20">
-            <form onSubmit={handleSubmit}>
-              {renderStep()}
-              
-              {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-8 pt-6 border-t border-white/20">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                  className={`btn btn--secondary ${
-                    currentStep === 1 ? 'btn:disabled' : ''
-                  }`}
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Previous</span>
-                </button>
-
-                {currentStep < 4 ? (
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    disabled={!isStepValid()}
-                    className={`btn btn--primary ${
-                      !isStepValid() ? 'btn:disabled' : ''
-                    }`}
-                  >
-                    <span>Continue</span>
-                    <ArrowLeft className="w-4 h-4 rotate-180" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="btn btn--primary btn--lg"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Saving your check-in...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Moon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                        <span>Complete Check-in</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </form>
+          
+          {/* Step Content */}
+          {renderStep()}
+          
+          {/* Navigation Buttons */}
+          <div className="flex justify-between mt-8">
+            <button
+              type="button"
+              onClick={prevStep}
+              className={`btn btn--ghost ${currentStep === 1 ? 'invisible' : ''}`}
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              <span>Back</span>
+            </button>
+            
+            {currentStep < 4 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                disabled={!isStepValid()}
+                className={`btn btn--primary ${
+                  !isStepValid() ? 'btn:disabled' : ''
+                }`}
+              >
+                <span>Continue</span>
+                <ArrowLeft className="w-4 h-4 rotate-180" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="btn btn--primary"
+              >
+                <span>Complete Check-in</span>
+                <Check className="w-4 h-4 ml-1" />
+              </button>
+            )}
           </div>
         </div>
       </div>

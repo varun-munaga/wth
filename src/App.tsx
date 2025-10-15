@@ -65,6 +65,8 @@ function App() {
             <Route path="/diary" element={<Diary darkMode={darkMode} />} />
             <Route path="/diary/evening" element={<EveningCheckin darkMode={darkMode} />} />
             <Route path="/diary/morning" element={<MorningReflection darkMode={darkMode} />} />
+            <Route path="/evening-checkin" element={<EveningCheckin darkMode={darkMode} />} />
+            <Route path="/morning-reflection" element={<MorningReflection darkMode={darkMode} />} />
             <Route path="/chat" element={<Chat darkMode={darkMode} />} />
             <Route path="/insights" element={<Insights darkMode={darkMode} />} />
             <Route path="/settings" element={<Settings darkMode={darkMode} onToggleDarkMode={toggleDarkMode} />} />

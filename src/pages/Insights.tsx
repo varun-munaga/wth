@@ -217,6 +217,24 @@ const Insights: React.FC = () => {
             ))}
           </div>
         </div>
+        
+        {/* Evening Check-in and Morning Reflection buttons */}
+        <div className="flex items-center justify-center space-x-4 mb-8 animate-fade-in-up">
+          <Link
+            to="/evening-checkin"
+            className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg"
+          >
+            <Moon className="w-5 h-5" />
+            <span>Evening Check-in</span>
+          </Link>
+          <Link
+            to="/morning-reflection"
+            className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-300 hover:scale-105 shadow-lg"
+          >
+            <Zap className="w-5 h-5" />
+            <span>Morning Reflection</span>
+          </Link>
+        </div>
 
         {stats ? (
           <>

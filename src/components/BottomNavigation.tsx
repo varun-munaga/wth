@@ -12,7 +12,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ darkMode }) => {
   const tabs = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/diary', icon: BookOpen, label: 'Diary' },
-    { path: '/chat', icon: MessageCircle, label: 'AI Chat' },
+    { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/insights', icon: TrendingUp, label: 'Insights' },
     { path: '/settings', icon: Settings, label: 'Settings' }
   ];

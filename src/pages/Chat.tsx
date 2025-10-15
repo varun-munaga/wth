@@ -23,7 +23,7 @@ interface Message {
   id: string;
   text: string;
   sender: 'user' | 'ai';
-  timestamp: Date;
+  timestamp: Date | string;
   type?: 'typing' | 'normal';
 }
 
@@ -32,6 +32,7 @@ interface ChatData {
   user?: {
     name: string;
   };
+  sleepEntries?: any[];
 }
 
 const Chat: React.FC = () => {
@@ -95,7 +96,13 @@ const Chat: React.FC = () => {
       const data: ChatData = loadData();
       const chatHistory = data.chatHistory || [];
       
-      if (chatHistory.length === 0) {
+      // Convert ISO date strings back to Date objects
+      const processedHistory = chatHistory.map(msg => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
+      }));
+      
+      if (processedHistory.length === 0) {
         // Add personalized greeting
         const greeting: Message = {
           id: Date.now().toString(),
@@ -107,7 +114,8 @@ const Chat: React.FC = () => {
         };
         setMessages([greeting]);
       } else {
-        setMessages(chatHistory);
+        // Use the already processed history with proper Date objects
+        setMessages(processedHistory);
       }
       
       setSuggestions(quickSuggestions.slice(0, 4));
@@ -182,7 +190,16 @@ const Chat: React.FC = () => {
 
       // Save to localStorage
       const data = loadData();
-      data.chatHistory = [...(data.chatHistory || []), userMessage, aiResponse];
+      // Fix: Convert Date objects to strings before saving to localStorage
+      const userMessageToSave = {
+        ...userMessage,
+        timestamp: userMessage.timestamp.toISOString()
+      };
+      const aiResponseToSave = {
+        ...aiResponse,
+        timestamp: aiResponse.timestamp.toISOString()
+      };
+      data.chatHistory = [...(data.chatHistory || []), userMessageToSave, aiResponseToSave];
       saveData(data);
     }, thinkingTime);
   };

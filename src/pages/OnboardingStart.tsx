@@ -223,12 +223,10 @@ const OnboardingStart: React.FC = () => {
                       </label>
                       <div className="relative">
                         <input
-                          type="number"
+                          type="text"
                           required
-                          min="13"
-                          max="100"
                           value={formData.age}
-                          onChange={(e) => handleInputChange('age', e.target.value)}
+                          onChange={(e) => handleInputChange('age', e.target.value.replace(/\D/g, ''))}
                           onFocus={() => setFocusedField('age')}
                           onBlur={() => setFocusedField(null)}
                           placeholder="25"

@@ -42,8 +42,8 @@ const MorningReflection: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const navigate = useNavigate();
 
-  const sleepQualityEmojis = ['😴', '😕', '😐', '🙂', '😊', '😌', '😎', '🤩', '✨', '🌟'];
-  const energyEmojis = ['🪫', '🔋', '🔋', '🔋', '🔋', '⚡', '⚡', '⚡', '⚡', '🚀'];
+  const sleepQualityEmojis = ['😴', '😪', '😔', '😌', '🙂', '😊', '😄', '😁', '🤩', '✨'];
+  const energyEmojis = ['🔌', '🪫', '🔋', '📶', '💡', '⚡', '💪', '🔆', '🌞', '🚀'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +64,19 @@ const MorningReflection: React.FC = () => {
     };
 
     const data = loadData();
-    data.entries = [...(data.entries || []), entry];
+    
+    // Save to entries
+    if (!data.entries) {
+      data.entries = [];
+    }
+    data.entries = [entry, ...(data.entries || [])];
+    
+    // Also save to sleepEntries for consistency
+    if (!data.sleepEntries) {
+      data.sleepEntries = [];
+    }
+    data.sleepEntries = [entry, ...(data.sleepEntries || [])];
+    
     saveData(data);
 
     navigate('/dashboard');
@@ -99,29 +111,29 @@ const MorningReflection: React.FC = () => {
       case 1: return formData.sleepQuality > 0;
       case 2: return formData.wakeTime !== '';
       case 3: return formData.energyLevel > 0;
-      case 4: return true; // Gratitude is optional
+      case 4: return true; // Gratitude note is optional
       default: return false;
     }
   };
-
-  const renderStep = () => {
-    switch (currentStep) {
+  
+  const renderStep = (step: number) => {
+    switch (step) {
       case 1:
         return (
           <div className="space-y-8">
             <div className="text-center space-y-3">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl shadow-lg mb-4">
                 <Moon className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-white">How did you sleep last night?</h2>
-              <p className="text-slate-600 dark:text-slate-300 text-lg">This is about comfort, not performance</p>
+              <p className="text-slate-600 dark:text-slate-300 text-lg">Rate the quality of your sleep</p>
             </div>
 
             <div className="space-y-8">
               {/* Sleep Quality Display */}
               <div className="text-center">
                 <div className={`inline-flex items-center space-x-6 bg-gradient-to-r ${getSleepQualityMessage(formData.sleepQuality).bg} rounded-3xl px-10 py-8 shadow-2xl animate-bounce-gentle border border-white/20`}>
-                  <span className="text-5xl drop-shadow-lg">{sleepQualityEmojis[formData.sleepQuality - 1] || '😐'}</span>
+                  <span className="text-5xl drop-shadow-lg">{sleepQualityEmojis[formData.sleepQuality - 1] || '😴'}</span>
                   <div>
                     <div className="text-4xl font-bold text-white drop-shadow-lg">{formData.sleepQuality}/10</div>
                     <div className={`text-base font-semibold ${getSleepQualityMessage(formData.sleepQuality).color} drop-shadow-sm`}>
@@ -145,58 +157,14 @@ const MorningReflection: React.FC = () => {
                   <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400 mt-4 font-medium">
                     <span className="flex items-center space-x-2">
                       <Frown className="w-4 h-4" />
-                      <span>Restless</span>
+                      <span>Poor</span>
                     </span>
                     <span className="flex items-center space-x-2">
                       <Sparkles className="w-4 h-4" />
-                      <span>Refreshing</span>
+                      <span>Excellent</span>
                     </span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 2:
-        return (
-          <div className="space-y-8">
-            <div className="text-center space-y-3">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl shadow-lg mb-4">
-                <Sun className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-white">What time did you wake up?</h2>
-              <p className="text-slate-600 dark:text-slate-300 text-lg">Let's see how your sleep schedule is going</p>
-            </div>
-            
-            <div className="max-w-lg mx-auto space-y-8">
-              <div className="relative">
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50">
-                  <input
-                    type="time"
-                    value={formData.wakeTime}
-                    onChange={(e) => setFormData(prev => ({ ...prev, wakeTime: e.target.value }))}
-                    className="form-control text-center text-3xl font-bold bg-transparent border-0 focus:ring-0"
-                  />
-                </div>
-              </div>
-              
-              {/* Wake Time Suggestions */}
-              <div className="grid grid-cols-3 gap-3">
-                {['06:00', '06:30', '07:00', '07:30', '08:00', '08:30'].map((time) => (
-                  <button
-                    key={time}
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, wakeTime: time }))}
-                    className={`p-4 rounded-xl transition-all duration-300 hover:scale-105 font-semibold ${
-                      formData.wakeTime === time
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg border-2 border-amber-400'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600'
-                    }`}
-                  >
-                    {time}
-                  </button>
-                ))}
               </div>
 
               {/* Night Anxiety Question */}
@@ -240,6 +208,54 @@ const MorningReflection: React.FC = () => {
                     />
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-8">
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl shadow-lg mb-4">
+                <Sun className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-white">What time did you wake up?</h2>
+              <p className="text-slate-600 dark:text-slate-300 text-lg">Select your wake-up time</p>
+            </div>
+
+            <div className="space-y-8">
+              {/* Wake Time Input */}
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50">
+                <div className="flex justify-center">
+                  <input
+                    type="time"
+                    value={formData.wakeTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, wakeTime: e.target.value }))}
+                    className="form-control text-2xl font-bold text-center bg-white/80 dark:bg-slate-700/80 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 p-4 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              {/* Suggested Times */}
+              <div className="px-4">
+                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-4">Suggested times:</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {['06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30'].map(time => (
+                    <button
+                      key={time}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, wakeTime: time }))}
+                      className={`p-3 rounded-xl transition-all duration-300 hover:scale-105 ${
+                        formData.wakeTime === time
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
+                          : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      <span className="text-sm font-semibold">{time}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -293,27 +309,6 @@ const MorningReflection: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Sleep Duration */}
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
-                <h3 className="font-bold text-slate-800 dark:text-white mb-6 text-lg">How many hours did you sleep?</h3>
-                <div className="grid grid-cols-4 gap-3">
-                  {['5', '6', '7', '8', '9', '10', '11', '12'].map((hours) => (
-                    <button
-                      key={hours}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, sleepDuration: hours }))}
-                      className={`p-4 rounded-xl transition-all duration-300 hover:scale-105 font-semibold border-2 ${
-                        formData.sleepDuration === hours
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg border-blue-400'
-                          : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-transparent hover:border-slate-300 dark:hover:border-slate-600'
-                      }`}
-                    >
-                      {hours}h
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         );
@@ -323,63 +318,45 @@ const MorningReflection: React.FC = () => {
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg mb-4">
-                <Sparkles className="w-8 h-8 text-white" />
+                <Award className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-white">What are you grateful for today?</h2>
-              <p className="text-slate-600 dark:text-slate-300 text-lg">End on a positive note - even small things count</p>
+              <p className="text-slate-600 dark:text-slate-300 text-lg">Share something positive (optional)</p>
             </div>
-            
+
             <div className="space-y-8">
-              <div className="relative">
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50">
-                  <textarea
-                    value={formData.gratitudeNote}
-                    onChange={(e) => setFormData(prev => ({ ...prev, gratitudeNote: e.target.value }))}
-                    placeholder="I'm grateful for... (optional but recommended)"
-                    rows={5}
-                    className="form-control resize-none bg-transparent border-0 focus:ring-0 text-lg"
-                  />
-                </div>
-              </div>
-              
-              {/* Gratitude Prompts */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  "Someone who made me smile",
-                  "A moment of peace I had",
-                  "My body for getting me through",
-                  "A lesson I learned yesterday",
-                  "Something beautiful I noticed",
-                  "A challenge I overcame"
-                ].map((prompt, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setFormData(prev => ({ 
-                      ...prev, 
-                      gratitudeNote: prev.gratitudeNote ? `${prev.gratitudeNote}\n\n${prompt}: ` : `${prompt}: `
-                    }))}
-                    className="text-left p-5 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200/50 dark:border-purple-800/50 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 hover:scale-105 shadow-sm"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
-                      <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">{prompt}</span>
-                    </div>
-                  </button>
-                ))}
+              {/* Gratitude Note */}
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50">
+                <textarea
+                  value={formData.gratitudeNote}
+                  onChange={(e) => setFormData(prev => ({ ...prev, gratitudeNote: e.target.value }))}
+                  placeholder="I'm grateful for..."
+                  rows={5}
+                  className="form-control resize-none bg-white/80 dark:bg-slate-700/80 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-purple-500 w-full"
+                />
               </div>
 
-              {formData.gratitudeNote && (
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-800/50 animate-fade-in shadow-sm">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <Award className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                    <span className="font-bold text-purple-800 dark:text-purple-200 text-lg">Beautiful reflection!</span>
-                  </div>
-                  <p className="text-purple-700 dark:text-purple-300">
-                    Gratitude practice has been shown to improve sleep quality and reduce anxiety. You're building a powerful habit! ✨
-                  </p>
+              {/* Gratitude Suggestions */}
+              <div className="px-4">
+                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-4">Suggestions:</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    "I'm grateful for the peaceful sleep I had",
+                    "I'm grateful for the opportunity to start fresh today",
+                    "I'm grateful for my health and well-being",
+                    "I'm grateful for the people in my life"
+                  ].map(suggestion => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, gratitudeNote: suggestion }))}
+                      className="p-3 rounded-xl transition-all duration-300 hover:scale-105 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 text-left"
+                    >
+                      <span className="text-sm">{suggestion}</span>
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         );
@@ -390,108 +367,80 @@ const MorningReflection: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl min-h-screen flex flex-col">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in-down">
-          <div className="flex items-center space-x-4">
-            <Link 
-              to="/dashboard" 
-              className="p-3 hover:bg-white/80 dark:hover:bg-slate-800/80 rounded-xl transition-all duration-300 hover:scale-105 group shadow-sm border border-slate-200/50 dark:border-slate-700/50"
-            >
-              <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-            </Link>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-white mb-1 flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shadow-lg">
-                  <Sun className="w-6 h-6 text-white" />
-                </div>
-                <span>Morning Reflection</span>
-              </h1>
-              <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">Step {currentStep} of 4 - How did you sleep?</p>
-            </div>
-          </div>
-          
-          <div className="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 text-amber-700 dark:text-amber-300 px-4 py-2 rounded-full text-sm font-medium shadow-sm border border-amber-200/50 dark:border-amber-800/50">
-            <Coffee className="w-4 h-4" />
-            <span>Good morning!</span>
-          </div>
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 pb-20">
+      {/* Header */}
+      <div className="bg-white dark:bg-slate-800 shadow-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center">
+          <Link to="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+            <ArrowLeft className="w-6 h-6" />
+          </Link>
+          <h1 className="ml-4 text-xl font-bold text-slate-800 dark:text-white">Morning Reflection</h1>
         </div>
+      </div>
 
-        {/* Progress Bar */}
-        <div className="mb-8 animate-fade-in-up">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Progress</span>
-            <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round((currentStep / 4) * 100)}%</span>
-          </div>
-          <div className="w-full bg-slate-200/60 dark:bg-slate-700/60 rounded-full h-3 shadow-inner">
-            <div 
-              className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
-              style={{ width: `${(currentStep / 4) * 100}%` }}
-            ></div>
-          </div>
+      {/* Progress Bar */}
+      <div className="container mx-auto px-4 pt-6">
+        <div className="bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div 
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${(currentStep / 4) * 100}%` }}
+          ></div>
         </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-full max-w-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl border border-white/20 dark:border-slate-700/20 animate-fade-in-up">
-            <form onSubmit={handleSubmit}>
-              {renderStep()}
-              
-              {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-10 pt-8 border-t border-slate-200/50 dark:border-slate-700/50">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                    currentStep === 1 
-                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed' 
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 hover:scale-105 shadow-sm'
-                  }`}
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                  <span>Previous</span>
-                </button>
-
-                {currentStep < 4 ? (
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    disabled={!isStepValid()}
-                    className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                      !isStepValid() 
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed' 
-                        : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 hover:scale-105 shadow-lg'
-                    }`}
-                  >
-                    <span>Continue</span>
-                    <ArrowLeft className="w-5 h-5 rotate-180" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Saving reflection...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sun className="w-6 h-6 group-hover:rotate-90 transition-transform" />
-                        <span>Complete Reflection</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
+        <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-2">
+          <span>Sleep</span>
+          <span>Wake Time</span>
+          <span>Energy</span>
+          <span>Gratitude</span>
         </div>
+      </div>
+
+      {/* Form */}
+      <div className="container mx-auto px-4 py-8">
+        <form onSubmit={handleSubmit}>
+          {renderStep(currentStep)}
+
+          {/* Navigation Buttons */}
+          <div className="mt-12 flex justify-between">
+            {currentStep > 1 ? (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="px-6 py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-300"
+              >
+                Previous
+              </button>
+            ) : (
+              <div></div>
+            )}
+
+            {currentStep < 4 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                disabled={!isStepValid()}
+                className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  isStepValid()
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                    : 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  isSubmitting
+                    ? 'bg-slate-400 dark:bg-slate-700 text-white cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                }`}
+              >
+                {isSubmitting ? 'Saving...' : 'Complete Reflection'}
+              </button>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );

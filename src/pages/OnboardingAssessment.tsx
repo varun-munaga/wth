@@ -35,6 +35,7 @@ const OnboardingAssessment: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const navigate = useNavigate();
+  const data = loadData();
 
   const sleepIssuesOptions = [
     { id: 'falling_asleep', label: 'Difficulty falling asleep', icon: Clock },
@@ -77,7 +78,12 @@ const OnboardingAssessment: React.FC = () => {
       completedAt: new Date().toISOString()
     } as AnxietyAssessment;
     saveData(data);
-
+    
+    setIsSubmitting(false);
+    // Navigation will now happen only when the user clicks the "Continue to Dashboard" button
+  };
+  
+  const handleContinue = () => {
     navigate('/onboarding/complete');
   };
 
@@ -418,23 +424,36 @@ const OnboardingAssessment: React.FC = () => {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="btn btn--primary btn--lg"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Processing assessment...</span>
-                      </>
+                  <>
+                    {!data.assessment ? (
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="btn btn--primary btn--lg"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Processing assessment...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Brain className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <span>Complete Assessment</span>
+                          </>
+                        )}
+                      </button>
                     ) : (
-                      <>
-                        <Brain className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        <span>Complete Assessment</span>
-                      </>
+                      <button
+                        type="button"
+                        onClick={handleContinue}
+                        className="btn btn--primary btn--lg"
+                      >
+                        <span>Continue to Dashboard</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </form>

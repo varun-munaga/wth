@@ -35,11 +35,22 @@ interface DashboardData {
     triggers?: string[];
     notes?: string;
   }>;
+  sleepEntries?: Array<{
+    id: string;
+    type: string;
+    date: string;
+    anxietyLevel?: number;
+    bedtime?: string;
+    triggers?: string[];
+    notes?: string;
+    voiceNote?: string;
+    timestamp?: string;
+  }>;
   chatHistory?: Array<{
     id: string;
     text: string;
     sender: 'user' | 'ai';
-    timestamp: Date;
+    timestamp: string | Date;
   }>;
 }
 
@@ -154,94 +165,69 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Quick Stats Grid - Simplified to reduce clutter */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           
-          {/* Sleep Quality Card */}
-          <div className={`card-gradient bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group ${animateStats ? 'animate-fade-in-up' : 'opacity-0'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors group-hover:scale-110 duration-300">
-                <Moon className="w-8 h-8" />
+          {/* Sleep & Anxiety Card - Combined for less clutter */}
+          <div className={`card-gradient bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 group ${animateStats ? 'animate-fade-in-up' : 'opacity-0'}`}>
+            <h3 className="text-lg font-bold mb-4 text-white">Sleep & Anxiety</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 p-4 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Moon className="w-5 h-5 text-blue-200" />
+                  <p className="text-blue-100 text-sm font-medium">Sleep Quality</p>
+                </div>
+                <p className="text-2xl font-bold">{avgSleep.toFixed(1)}/10</p>
+                <div className="w-full bg-blue-400/30 rounded-full h-1 mt-2">
+                  <div 
+                    className="bg-white h-1 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${animateStats ? (avgSleep / 10) * 100 : 0}%` }}
+                  ></div>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-blue-100 text-sm font-medium">Sleep Quality</p>
-                <p className="text-3xl font-bold">{avgSleep.toFixed(1)}/10</p>
+              
+              <div className="bg-white/10 p-4 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Heart className="w-5 h-5 text-pink-200" />
+                  <p className="text-purple-100 text-sm font-medium">Anxiety</p>
+                </div>
+                <p className="text-2xl font-bold">{avgAnxiety.toFixed(1)}/10</p>
+                <div className="w-full bg-purple-400/30 rounded-full h-1 mt-2">
+                  <div 
+                    className="bg-white h-1 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${animateStats ? (10 - avgAnxiety) * 10 : 0}%` }}
+                  ></div>
+                </div>
               </div>
-            </div>
-            <div className="w-full bg-blue-400 rounded-full h-2">
-              <div 
-                className="bg-white h-2 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${animateStats ? (avgSleep / 10) * 100 : 0}%` }}
-              ></div>
-            </div>
-            <p className="text-blue-100 text-xs mt-2">
-              {avgSleep > 7 ? '🎉 Excellent!' : avgSleep > 5 ? '👍 Good progress' : '💪 Keep going!'}
-            </p>
-          </div>
-
-          {/* Anxiety Level Card */}
-          <div className={`card-gradient bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group ${animateStats ? 'animate-fade-in-up delay-100' : 'opacity-0'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors group-hover:scale-110 duration-300">
-                <Heart className="w-8 h-8" />
-              </div>
-              <div className="text-right">
-                <p className="text-purple-100 text-sm font-medium">Anxiety Level</p>
-                <p className="text-3xl font-bold">{avgAnxiety.toFixed(1)}/10</p>
-              </div>
-            </div>
-            <div className="w-full bg-purple-400 rounded-full h-2">
-              <div 
-                className="bg-white h-2 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${animateStats ? (10 - avgAnxiety) * 10 : 0}%` }}
-              ></div>
-            </div>
-            <p className="text-purple-100 text-xs mt-2">
-              {avgAnxiety < 4 ? '🌟 Great control!' : avgAnxiety < 7 ? '📈 Improving' : '🤗 We\'re here to help'}
-            </p>
-          </div>
-
-          {/* Total Entries Card */}
-          <div className={`card-gradient bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group ${animateStats ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors group-hover:scale-110 duration-300">
-                <Calendar className="w-8 h-8" />
-              </div>
-              <div className="text-right">
-                <p className="text-emerald-100 text-sm font-medium">Sleep Entries</p>
-                <p className="text-3xl font-bold">{recentEntries.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-emerald-100 text-sm">Last 7 days</p>
-              <Target className="w-4 h-4 text-emerald-200" />
-            </div>
-            <div className="w-full bg-emerald-400 rounded-full h-1 mt-2">
-              <div 
-                className="bg-white h-1 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${animateStats ? getProgressPercentage() : 0}%` }}
-              ></div>
             </div>
           </div>
 
-          {/* AI Conversations Card */}
-          <div className={`card-gradient bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group ${animateStats ? 'animate-fade-in-up delay-300' : 'opacity-0'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors group-hover:scale-110 duration-300">
-                <MessageCircle className="w-8 h-8" />
+          {/* Activity & AI Card - Combined for less clutter */}
+          <div className={`card-gradient bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 group ${animateStats ? 'animate-fade-in-up delay-100' : 'opacity-0'}`}>
+            <h3 className="text-lg font-bold mb-4 text-white">Activity & Support</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 p-4 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Calendar className="w-5 h-5 text-emerald-200" />
+                  <p className="text-emerald-100 text-sm font-medium">Entries</p>
+                </div>
+                <p className="text-2xl font-bold">{recentEntries.length}</p>
+                <div className="flex items-center text-xs text-emerald-100 mt-2">
+                  <Target className="w-3 h-3 mr-1" />
+                  <span>Last 7 days</span>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-orange-100 text-sm font-medium">AI Conversations</p>
-                <p className="text-3xl font-bold">{data.chatHistory?.length || 0}</p>
+              
+              <div className="bg-white/10 p-4 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                  <MessageCircle className="w-5 h-5 text-teal-200" />
+                  <p className="text-teal-100 text-sm font-medium">AI Coach</p>
+                </div>
+                <Link to="/chat" className="text-lg font-bold flex items-center hover:text-white transition-colors">
+                  Chat Now <Activity className="w-3 h-3 ml-2 animate-pulse" />
+                </Link>
+                <p className="text-xs text-teal-100 mt-2">24/7 Support Available</p>
               </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-orange-100 text-sm">Total messages</p>
-              <Activity className="w-4 h-4 text-orange-200" />
-            </div>
-            <div className="flex items-center space-x-1 mt-2">
-              <div className="w-2 h-2 bg-orange-200 rounded-full animate-pulse"></div>
-              <p className="text-orange-100 text-xs">AI ready to help</p>
             </div>
           </div>
         </div>

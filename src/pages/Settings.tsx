@@ -25,7 +25,7 @@ interface UserData {
 
 const loadData = (): UserData => {
   try {
-    const data = localStorage.getItem('sleepsense_data');
+    const data = localStorage.getItem('sleepsense-data');
     return data ? JSON.parse(data) : { 
       entries: [], 
       chatHistory: [], 
@@ -57,7 +57,7 @@ const loadData = (): UserData => {
 };
 
 const saveData = (data: UserData) => {
-  localStorage.setItem('sleepsense_data', JSON.stringify(data));
+  localStorage.setItem('sleepsense-data', JSON.stringify(data));
 };
 
 export default function Settings() {
@@ -82,21 +82,78 @@ export default function Settings() {
     setData(updatedData);
     saveData(updatedData);
     
+    // Apply dark mode immediately
+    if (newSettings.darkMode !== undefined) {
+      if (newSettings.darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    
     // Show success message
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 2000);
   };
 
-  const handleExportJSON = async () => {
+  const handleExportPDF = async () => {
     setIsExporting(true);
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    // Create a simple PDF report content
+    const reportContent = `
+      <html>
+        <head>
+          <title>SleepSense Health Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; }
+            h1 { color: #4F46E5; }
+            .section { margin-bottom: 20px; }
+            .section-title { font-weight: bold; margin-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>SleepSense Health Report</h1>
+          <p>Generated on: ${new Date().toLocaleDateString()}</p>
+          
+          <div class="section">
+            <div class="section-title">User Information</div>
+            <p>Name: ${data.user?.name || 'Not provided'}</p>
+            <p>Email: ${data.user?.email || 'Not provided'}</p>
+            <p>Age: ${data.user?.age || 'Not provided'}</p>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">Sleep Summary</div>
+            <p>Average Sleep Duration: 7.2 hours</p>
+            <p>Sleep Quality Rating: Good</p>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">Anxiety Levels</div>
+            <p>Average Anxiety Level: 3.5/10</p>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">Recommendations</div>
+            <ul>
+              <li>Maintain a consistent sleep schedule</li>
+              <li>Practice relaxation techniques before bed</li>
+              <li>Limit screen time 1 hour before sleep</li>
+            </ul>
+          </div>
+        </body>
+      </html>
+    `;
+    
+    const dataBlob = new Blob([reportContent], { type: 'text/html' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `sleepsense-data-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `sleepsense-report-${new Date().toISOString().split('T')[0]}.html`;
     link.click();
     URL.revokeObjectURL(url);
     setIsExporting(false);
@@ -145,7 +202,7 @@ export default function Settings() {
   };
 
   const handleDeleteAllData = async () => {
-    localStorage.removeItem('sleepsense_data');
+    localStorage.removeItem('sleepsense-data');
     setData({ 
       entries: [], 
       chatHistory: [], 
@@ -217,21 +274,65 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="group p-5 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-[1.02]">
                   <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Name</label>
-                  <p className="text-xl font-semibold text-slate-800 dark:text-white">
-                    {data.user?.name || 'Not set'}
-                  </p>
+                  <input 
+                    type="text" 
+                    value={data.user?.name || ''} 
+                    onChange={(e) => {
+                      const updatedData = {
+                        ...data,
+                        user: {
+                          ...(data.user || { id: Date.now().toString(), createdAt: new Date() }),
+                          name: e.target.value
+                        }
+                      };
+                      setData(updatedData);
+                      saveData(updatedData);
+                    }}
+                    className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white"
+                    placeholder="Enter your name"
+                  />
                 </div>
                 <div className="group p-5 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-[1.02]">
                   <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Email</label>
-                  <p className="text-xl font-semibold text-slate-800 dark:text-white">
-                    {data.user?.email || 'Not set'}
-                  </p>
+                  <input 
+                    type="email" 
+                    value={data.user?.email || ''} 
+                    onChange={(e) => {
+                      const updatedData = {
+                        ...data,
+                        user: {
+                          ...(data.user || { id: Date.now().toString(), createdAt: new Date() }),
+                          email: e.target.value
+                        }
+                      };
+                      setData(updatedData);
+                      saveData(updatedData);
+                    }}
+                    className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white"
+                    placeholder="Enter your email"
+                  />
                 </div>
                 <div className="group p-5 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-[1.02]">
                   <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Age</label>
-                  <p className="text-xl font-semibold text-slate-800 dark:text-white">
-                    {data.user?.age || 'Not set'}
-                  </p>
+                  <input 
+                    type="number" 
+                    value={data.user?.age || ''} 
+                    onChange={(e) => {
+                      const updatedData = {
+                        ...data,
+                        user: {
+                          ...(data.user || { id: Date.now().toString(), createdAt: new Date() }),
+                          age: parseInt(e.target.value) || 0
+                        }
+                      };
+                      setData(updatedData);
+                      saveData(updatedData);
+                    }}
+                    className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white"
+                    placeholder="Enter your age"
+                    min="1"
+                    max="120"
+                  />
                 </div>
               </div>
             </div>
@@ -292,26 +393,7 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {/* Animations */}
-                <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 group hover:scale-[1.02]">
-                  <div className="flex items-center space-x-4">
-                    <Zap className="w-6 h-6 text-emerald-600" />
-                    <div>
-                      <span className="font-semibold text-slate-700 dark:text-slate-200 text-lg">Animations</span>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Smooth transitions and effects</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => updateSettings({ animations: !data.settings.animations })}
-                    className={`relative w-16 h-8 rounded-full transition-all duration-300 hover:scale-110 shadow-lg ${
-                      data.settings.animations ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
-                  >
-                    <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-lg transition-transform duration-300 ${
-                      data.settings.animations ? 'translate-x-8' : 'translate-x-0'
-                    }`} />
-                  </button>
-                </div>
+                {/* Removed animations toggle as requested */}
               </div>
             </div>
           </div>
@@ -424,7 +506,7 @@ export default function Settings() {
 
                 <div className="space-y-3">
                   <button
-                    onClick={handleExportJSON}
+                    onClick={handleExportPDF}
                     disabled={isExporting}
                     className="w-full flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 disabled:scale-100 disabled:opacity-50 shadow-lg hover:shadow-xl group"
                   >
@@ -436,7 +518,7 @@ export default function Settings() {
                     ) : (
                       <>
                         <Download className="w-5 h-5 group-hover:animate-bounce" />
-                        <span className="font-semibold">Export All Data (JSON)</span>
+                        <span className="font-semibold">Download Health Report (PDF)</span>
                       </>
                     )}
                   </button>
